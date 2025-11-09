@@ -5,13 +5,13 @@ import Link from "next/link";
 
 export const RegisterSection = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 border bg-white p-8 rounded-lg shadow-md">
       {/* Logo */}
-      <div className="flex justify-center">
+      {/* <div className="flex justify-center">
         <div className="bg-blue-100 p-3 rounded-full">
           <Wallet className="text-blue-600 w-6 h-6" />
         </div>
-      </div>
+      </div> */}
 
       {/* Heading */}
       <div className="text-center space-y-1">

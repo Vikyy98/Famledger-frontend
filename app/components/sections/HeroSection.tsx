@@ -14,8 +14,10 @@ export const HeroSection = () => {
       {/* Heading */}
       <div>
         <h1 className="text-4xl font-bold text-gray-900 leading-tight">
-          Begin Your Family
-          <span className="text-blue-600">Financial Journey</span>
+          {"Begin Your Family's"}
+        </h1>
+        <h1 className="text-4xl font-bold leading-tight text-blue-600">
+          Financial Journey
         </h1>
         <p className="text-gray-600 mt-3">
           Join thousands of families building wealth, achieving goals, and
@@ -61,21 +63,6 @@ export const HeroSection = () => {
           title="Goal Tracking"
           description="Achieve dreams together"
         />
-      </div>
-
-      {/* Testimonial */}
-      <div className="mt-6 bg-white rounded-2xl p-4 shadow-sm border">
-        {/* <Image
-          src="/register-family-photo.jpg"
-          alt="Happy Family"
-          width={100}
-          height={50}
-          className="rounded-xl mb-3 object-"
-        /> */}
-        <p className="text-gray-700 text-sm italic">
-          “We went from financial stress to financial success. FamLedger gave us
-          the tools to plan and grow together.”
-        </p>
       </div>
     </div>
   );

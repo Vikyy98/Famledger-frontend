@@ -1,16 +1,47 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { useAppDispatch } from "@/src/hooks/useAuth";
+import { useRegisterUserMutation } from "@/src/auth/authAPI";
+import { RegisterRequest } from "@/src/auth/type";
 
 export const RegisterForm = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const disptach = useAppDispatch();
+  const [registerUser, { data, error, isLoading }] = useRegisterUserMutation();
+
+  const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log({ name, email, password, confirmPassword });
+
+    const userData: RegisterRequest = {
+      fullName: name,
+      familyName: "",
+      email: email,
+      password: password,
+      role: "Admin",
+    };
+
+    const respone = registerUser(userData).unwrap();
+    console.log("Registration successful:", data);
+    console.log("Registration Unsuccessful:", error);
+  };
+
   return (
-    <form className="space-y-5">
+    <form onSubmit={(e) => handleOnSubmit(e)} className="space-y-5">
       {/* Full Name */}
       <Input
         label="Full Name"
         placeholder="John Doe"
         icon={<User className="w-4 h-4" />}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
       />
 
       {/* Email */}
@@ -19,6 +50,8 @@ export const RegisterForm = () => {
         placeholder="you@example.com"
         type="email"
         icon={<Mail className="w-4 h-4" />}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
 
       {/* Password */}
@@ -27,6 +60,8 @@ export const RegisterForm = () => {
         placeholder="At least 6 characters"
         type="password"
         icon={<Lock className="w-4 h-4" />}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
       />
 
       {/* Confirm Password */}
@@ -35,6 +70,8 @@ export const RegisterForm = () => {
         placeholder="Re-enter password"
         type="password"
         icon={<Lock className="w-4 h-4" />}
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
       />
 
       {/* Info text */}
@@ -43,8 +80,13 @@ export const RegisterForm = () => {
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" variant="primary" className="w-full">
-        Create Free Account
+      <Button
+        isLoading={isLoading}
+        type="submit"
+        variant="primary"
+        className="w-full"
+      >
+        {isLoading ? "Registering..." : "Create New Account"}
       </Button>
 
       {/* Terms Note */}

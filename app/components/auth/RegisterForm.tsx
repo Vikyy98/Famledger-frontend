@@ -1,25 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useAppDispatch } from "@/src/hooks/useAuth";
 import { useRegisterUserMutation } from "@/src/auth/authAPI";
 import { RegisterRequest } from "@/src/auth/type";
+import { useRouter } from "next/navigation";
 
 export const RegisterForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const disptach = useAppDispatch();
-  const [registerUser, { data, error, isLoading }] = useRegisterUserMutation();
+  const [registerUser, { data, isSuccess, isError, error, isLoading }] =
+    useRegisterUserMutation();
+  const router = useRouter();
 
-  const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({ name, email, password, confirmPassword });
-
     const userData: RegisterRequest = {
       fullName: name,
       familyName: "",
@@ -28,10 +28,19 @@ export const RegisterForm = () => {
       role: "Admin",
     };
 
-    const respone = registerUser(userData).unwrap();
-    console.log("Registration successful:", data);
-    console.log("Registration Unsuccessful:", error);
+    try {
+      await registerUser(userData).unwrap();
+    } catch (error) {
+      console.error("Registration Error:", error);
+      alert(`Error: ${error || "Failed to register."}`);
+    }
   };
+
+  useEffect(() => {
+    if (data && isSuccess) {
+      router.push("/dashboard");
+    }
+  }, [data, isSuccess, router]);
 
   return (
     <form onSubmit={(e) => handleOnSubmit(e)} className="space-y-5">

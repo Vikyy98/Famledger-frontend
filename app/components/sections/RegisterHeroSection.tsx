@@ -3,7 +3,7 @@ import { FeatureCard } from "../ui/FeatureCard";
 import { IconWrapper } from "../ui/IconWrapper";
 import { Rocket, Heart, PiggyBank, Target } from "lucide-react";
 
-export const HeroSection = () => {
+export const RegisterHeroSection = () => {
   return (
     <div className="max-w-lg space-y-8">
       {/* Tagline */}

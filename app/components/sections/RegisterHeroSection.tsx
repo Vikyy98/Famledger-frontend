@@ -3,7 +3,7 @@ import { FeatureCard } from "../ui/FeatureCard";
 import { IconWrapper } from "../ui/IconWrapper";
 import { Rocket, Heart, PiggyBank, Target } from "lucide-react";
 
-export const RegisterHeroSection = () => {
+function RegisterHeroSection() {
   return (
     <div className="max-w-lg space-y-8">
       {/* Tagline */}
@@ -66,4 +66,6 @@ export const RegisterHeroSection = () => {
       </div>
     </div>
   );
-};
+}
+
+export default RegisterHeroSection;

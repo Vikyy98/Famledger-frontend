@@ -1,9 +1,9 @@
 import React from "react";
-import { RegisterForm } from "../auth/RegisterForm";
+import RegisterForm from "../auth/RegisterForm";
 import { Wallet } from "lucide-react";
 import Link from "next/link";
 
-export const RegisterSection = () => {
+function RegisterSection() {
   return (
     <div className="space-y-4 border bg-white p-8 rounded-lg shadow-md">
       {/* Logo */}
@@ -38,4 +38,6 @@ export const RegisterSection = () => {
       </div>
     </div>
   );
-};
+}
+
+export default RegisterSection;

@@ -1,21 +1,42 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { LoginRequest, LoginResponse, RegisterRequest } from "./type";
+import { RootState } from "../app/store";
+
+export const baseQuery = fetchBaseQuery({
+  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+  prepareHeaders: (headers, { getState }) => {
+    const token =
+      (getState() as RootState).auth.token ?? typeof window !== "undefined"
+        ? localStorage.getItem("token")
+        : null;
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
+});
 
 const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-  }),
+  baseQuery,
   endpoints: (builder) => ({
     // Define your authentication endpoints here
     registerUser: builder.mutation({
-      query: (userData) => ({
+      query: (userData: RegisterRequest) => ({
         url: "/register",
         method: "POST",
         body: userData,
       }),
     }),
+    loginUser: builder.mutation<LoginResponse, LoginRequest>({
+      query: (loginDetails) => ({
+        url: "/login",
+        method: "POST",
+        body: loginDetails,
+      }),
+    }),
   }),
 });
 
-export const { useRegisterUserMutation } = authApi;
+export const { useRegisterUserMutation, useLoginUserMutation } = authApi;
 export default authApi;

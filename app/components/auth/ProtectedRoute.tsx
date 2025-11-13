@@ -1,4 +1,4 @@
-import { useAppSelector } from "@/src/hooks/useAuth";
+import { useAppSelector } from "@/app/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 

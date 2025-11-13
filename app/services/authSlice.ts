@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { LoginResponse } from "./type";
+import { LoginResponse } from "../types/auth";
 
 function getInitialAuthState() {
   if (typeof window === "undefined") return { user: null, token: null };

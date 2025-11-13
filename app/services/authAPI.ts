@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { LoginRequest, LoginResponse, RegisterRequest } from "./type";
-import { RootState } from "../app/store";
+import { LoginRequest, LoginResponse, RegisterRequest } from "../types/auth";
+import { RootState } from "../store/store";
 
 export const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,

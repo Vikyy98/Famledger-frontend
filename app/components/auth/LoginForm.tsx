@@ -5,11 +5,11 @@ import { Eye, EyeOff } from "lucide-react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import Link from "next/link";
-import { useLoginUserMutation } from "@/src/auth/authAPI";
-import { LoginRequest } from "@/src/auth/type";
+import { useLoginUserMutation } from "@/app/services/authAPI";
+import { LoginRequest } from "@/app/types/auth";
 import { useRouter } from "next/navigation";
-import { useAppDispatch } from "@/src/hooks/useAuth";
-import { setUserDetails } from "@/src/auth/authSlice";
+import { useAppDispatch } from "@/app/hooks/useAuth";
+import { setUserDetails } from "@/app/services/authSlice";
 
 export default function LoginForm() {
   const dispatch = useAppDispatch();

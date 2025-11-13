@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import { useRegisterUserMutation } from "@/src/auth/authAPI";
-import { RegisterRequest } from "@/src/auth/type";
+import { useRegisterUserMutation } from "@/app/services/authAPI";
+import { RegisterRequest } from "@/app/types/auth";
 import { useRouter } from "next/navigation";
 
 // --- Constants for Validation ---

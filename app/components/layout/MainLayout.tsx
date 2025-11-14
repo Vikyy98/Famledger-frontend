@@ -1,6 +1,6 @@
 import React from "react";
-import SideBar from "../shared/SideBar";
-import NavBar from "../shared/NavBar";
+import SideBar from "./SideBar";
+import NavBar from "./NavBar";
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (

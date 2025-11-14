@@ -1,6 +1,6 @@
 import React from "react";
 import { PiggyBank } from "lucide-react";
-import LoginForm from "../auth/LoginForm";
+import LoginForm from "../../auth/LoginForm";
 import Link from "next/link";
 
 export default function LoginSection() {

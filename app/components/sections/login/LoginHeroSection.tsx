@@ -1,6 +1,6 @@
 import { ArrowRight, Shield, Sparkle, Timer, Users } from "lucide-react";
-import { IconWrapper } from "../ui/IconWrapper";
-import FeatureList from "../ui/FeatureList";
+import { IconWrapper } from "../../ui/IconWrapper";
+import FeatureList from "../../ui/FeatureList";
 
 export default function LoginHeroSection() {
   return (

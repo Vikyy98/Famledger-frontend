@@ -1,5 +1,5 @@
 import React from "react";
-import RegisterForm from "../auth/RegisterForm";
+import RegisterForm from "../../auth/RegisterForm";
 import { Wallet } from "lucide-react";
 import Link from "next/link";
 

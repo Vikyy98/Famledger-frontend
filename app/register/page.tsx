@@ -1,7 +1,7 @@
 import React from "react";
 
-import RegisterSection from "../components/sections/RegisterFormSection";
-import RegisterHeroSection from "../components/sections/RegisterHeroSection";
+import RegisterSection from "../components/sections/login/RegisterFormSection";
+import RegisterHeroSection from "../components/sections/login/RegisterHeroSection";
 import AuthLayout from "../components/layout/AuthLayout";
 
 export default function RegisterPage() {

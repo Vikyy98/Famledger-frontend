@@ -1,6 +1,6 @@
 import React from "react";
-import { FeatureCard } from "../ui/FeatureCard";
-import { IconWrapper } from "../ui/IconWrapper";
+import { FeatureCard } from "../../ui/FeatureCard";
+import { IconWrapper } from "../../ui/IconWrapper";
 import { Rocket, Heart, PiggyBank, Target } from "lucide-react";
 
 function RegisterHeroSection() {

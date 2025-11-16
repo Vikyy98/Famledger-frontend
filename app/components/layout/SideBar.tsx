@@ -1,3 +1,5 @@
+"use client";
+
 // common/SideBar.tsx
 import {
   PiggyBank,
@@ -12,6 +14,7 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 // Define the navigation items
@@ -28,7 +31,7 @@ export const navItems = [
 
 function SideBar() {
   // NOTE: For a real app, you'd use 'useRouter' here to check the current path
-  const activePath = "/dashboard"; // Placeholder for active link
+  const activePath = usePathname(); // Placeholder for active link
 
   return (
     <div className="flex flex-col justify-between w-64 h-full p-4 bg-white border-r shadow-lg">

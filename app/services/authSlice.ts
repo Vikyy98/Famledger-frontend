@@ -22,9 +22,9 @@ const authSlice = createSlice({
       if (action.payload) {
         const payload: LoginResponse = action.payload;
 
-        state.token = payload.token;
+        state.token = payload.user.token;
         state.user = payload.user;
-        localStorage.setItem("token", payload.token);
+        localStorage.setItem("token", payload.user.token);
         localStorage.setItem("user", JSON.stringify(payload.user));
       } else {
         console.log("Payload is empty to set user details");
@@ -40,5 +40,5 @@ const authSlice = createSlice({
   },
 });
 
-export default authSlice.reducer;
+export default authSlice;
 export const { setUserDetails, logoutUser } = authSlice.actions;

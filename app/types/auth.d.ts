@@ -10,6 +10,7 @@ export interface UserDetails {
   name: string;
   familyName: string;
   Role: string;
+  token: string;
 }
 
 export interface LoginRequest {
@@ -18,7 +19,5 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
   user: UserDetails;
 }
-

@@ -6,7 +6,7 @@ import IncomeSummary from "../components/income/IncomeSummary";
 import RecurringIncomeCard from "../components/income/RecurringIncomeCard";
 import IncomeTrendChart from "../components/income/IncomeTrendChart";
 import IncomeTable from "../components/income/IncomeTable";
-import { useGetIncomeDetailsQuery } from "../services/incomeAPI";
+import { useGetIncomeDetailsQuery } from "../services/api/incomeAPI";
 import IncomeSummarySkeleton from "../components/income/IncomeSummarySkeleton";
 import { AlertTriangle } from "lucide-react";
 import RecurringIncomeCardSkeleton from "../components/income/RecurringIncomeCardSkeleton";

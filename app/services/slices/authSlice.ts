@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { AuthState, LoginResponse } from "../types/auth";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AuthState, LoginResponse } from "../../types/auth";
 
 const getInitialAuthState = (): AuthState => {
   if (typeof window === "undefined") {
@@ -21,17 +21,11 @@ const authSlice = createSlice({
   name: "auth",
   initialState: initialState,
   reducers: {
-    setUserDetails: (state, action) => {
-      if (action.payload) {
-        const payload: LoginResponse = action.payload;
-
-        state.token = payload.user.token;
-        state.user = payload.user;
-        localStorage.setItem("token", payload.user.token);
-        localStorage.setItem("user", JSON.stringify(payload.user));
-      } else {
-        console.log("Payload is empty to set user details");
-      }
+    setUserDetails: (state, action: PayloadAction<LoginResponse>) => {
+      state.token = action.payload.user.token;
+      state.user = action.payload.user;
+      localStorage.setItem("token", action.payload.user.token);
+      localStorage.setItem("user", JSON.stringify(action.payload.user));
     },
     logoutUser: (state) => {
       state.token = null;

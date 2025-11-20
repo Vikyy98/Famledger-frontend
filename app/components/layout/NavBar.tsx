@@ -16,7 +16,7 @@ function NavBar() {
         <div>
           <h1 className="text-xl font-semibold">{currentPageName}</h1>
           <h2 className="text-sm font-normal text-gray-500">
-            Welcome Back {user.name}
+            Welcome Back {user?.name}
           </h2>
         </div>
 
@@ -57,11 +57,13 @@ function NavBar() {
           {/* User Profile / Family */}
           <div className="flex items-center space-x-2">
             <div className="text-right">
-              <div className="text-sm font-semibold">{user.name}</div>
-              <div className="text-xs text-gray-500">{user.family} Family</div>
+              <div className="text-sm font-semibold">{user?.name}</div>
+              <div className="text-xs text-gray-500">
+                {user?.familyName} Family
+              </div>
             </div>
             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
-              {user.name[0].toUpperCase()}
+              {user?.name[0].toUpperCase()}
             </div>
           </div>
         </div>

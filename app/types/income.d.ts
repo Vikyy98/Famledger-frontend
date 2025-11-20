@@ -24,5 +24,3 @@ export interface IncomeResponse {
   recurringIncomeCount: number;
   percentageDifference: string;
 }
-
-export enum incomeEnum {}

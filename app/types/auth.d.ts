@@ -1,3 +1,8 @@
+export interface AuthState {
+  token: string | null;
+  user: UserDetails | null;
+}
+
 export interface RegisterRequest {
   fullName: string;
   familyName?: string;
@@ -5,12 +10,14 @@ export interface RegisterRequest {
   password: string;
   role?: "User" | "Admin";
 }
+
 export interface UserDetails {
   userId: number;
-  email: string;
+  familyId: number;
   name: string;
+  email: string;
   familyName: string;
-  Role: string;
+  role: string;
   token: string;
 }
 
@@ -21,16 +28,4 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   user: UserDetails;
-}
-
-export interface FamilyRequest {
-  userId: number | undefined;
-  familyName: string;
-  invitationLink: string;
-  familyDetailType: number;
-}
-
-export interface AuthState {
-  token: string | null;
-  user: UserDetails | null;
 }

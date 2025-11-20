@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import { useRegisterUserMutation } from "@/app/services/authAPI";
+import { useRegisterUserMutation } from "@/app/services/api/authAPI";
 import { RegisterRequest } from "@/app/types/auth";
 import { useRouter } from "next/navigation";
 

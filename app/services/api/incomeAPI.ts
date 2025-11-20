@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQuery } from "./authAPI";
-import { IncomeResponse } from "../types/income";
+import { baseQuery } from "./baseAPI";
+import { IncomeResponse } from "../../types/income";
 
 const incomeApi = createApi({
   reducerPath: "incomeApi",

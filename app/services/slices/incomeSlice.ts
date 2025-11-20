@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { IncomeResponse } from "../types/income";
+import { IncomeResponse } from "../../types/income";
 
 const initialState: IncomeResponse = {
   userId: 0,

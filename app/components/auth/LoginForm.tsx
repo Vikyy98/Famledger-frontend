@@ -5,11 +5,11 @@ import { Eye, EyeOff } from "lucide-react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import Link from "next/link";
-import { useLoginUserMutation } from "@/app/services/authAPI";
+import { useLoginUserMutation } from "@/app/services/api/authAPI";
 import { LoginRequest } from "@/app/types/auth";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/app/hooks/useAuth";
-import { setUserDetails } from "@/app/services/authSlice";
+import { setUserDetails } from "@/app/services/slices/authSlice";
 
 export default function LoginForm() {
   const dispatch = useAppDispatch();
@@ -69,11 +69,12 @@ export default function LoginForm() {
       dispatch(setUserDetails(response));
 
       //If there is no family - First time login
-      if (!response.user.familyName) {
+      if (response.user.familyName == null && response.user.familyId == 0) {
         router.push("/create-family");
+      } else {
+        //Already user has family assigned
+        router.push("/dashboard");
       }
-
-      router.push("/dashboard");
     } catch (error) {
       console.log("Login failed", error);
       setApiError("Login failed. Please check your credentials and try again.");

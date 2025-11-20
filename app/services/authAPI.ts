@@ -35,8 +35,19 @@ const authApi = createApi({
         body: loginDetails,
       }),
     }),
+    createFamily: builder.mutation({
+      query: (familyDetails) => ({
+        url: "/family",
+        method: "POST",
+        body: familyDetails,
+      }),
+    }),
   }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation } = authApi;
+export const {
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useCreateFamilyMutation,
+} = authApi;
 export default authApi;

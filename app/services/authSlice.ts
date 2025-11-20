@@ -1,8 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { LoginResponse } from "../types/auth";
+import { AuthState, LoginResponse } from "../types/auth";
 
-function getInitialAuthState() {
-  if (typeof window === "undefined") return { user: null, token: null };
+const getInitialAuthState = (): AuthState => {
+  if (typeof window === "undefined") {
+    return { user: null, token: null };
+  }
 
   const token = localStorage.getItem("token");
   const user = localStorage.getItem("user");
@@ -11,7 +13,8 @@ function getInitialAuthState() {
     token: token || null,
     user: user ? JSON.parse(user) : null,
   };
-}
+};
+
 const initialState = getInitialAuthState();
 
 const authSlice = createSlice({

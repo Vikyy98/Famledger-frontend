@@ -67,6 +67,12 @@ export default function LoginForm() {
       const response = await loginUser(userLoginDetails).unwrap();
       console.log("Login successful", response.user);
       dispatch(setUserDetails(response));
+
+      //If there is no family - First time login
+      if (!response.user.familyName) {
+        router.push("/create-family");
+      }
+
       router.push("/dashboard");
     } catch (error) {
       console.log("Login failed", error);

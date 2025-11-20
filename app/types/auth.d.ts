@@ -6,6 +6,7 @@ export interface RegisterRequest {
   role?: "User" | "Admin";
 }
 export interface UserDetails {
+  userId: number;
   email: string;
   name: string;
   familyName: string;
@@ -20,4 +21,16 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   user: UserDetails;
+}
+
+export interface FamilyRequest {
+  userId: number | undefined;
+  familyName: string;
+  invitationLink: string;
+  familyDetailType: number;
+}
+
+export interface AuthState {
+  token: string | null;
+  user: UserDetails | null;
 }

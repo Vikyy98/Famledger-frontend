@@ -6,6 +6,8 @@ const initialState: IncomeResponse = {
   familyId: 0,
   totalIncome: "",
   totalRecurringIncome: "",
+  recurringIncomeCount: 0,
+  percentageDifference: "",
   incomes: [],
 };
 

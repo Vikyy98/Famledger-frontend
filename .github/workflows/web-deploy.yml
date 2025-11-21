@@ -29,7 +29,6 @@ jobs:
     - name: Prepare Standalone Package
       run: |
         cp -r public .next/standalone/
-        cp -r .next/static .next/standalone/.next/static
         
     - name: Upload artifact for deployment
       uses: actions/upload-artifact@v4

@@ -9,28 +9,24 @@ env:
   NODE_VERSION: '22.x'
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Use Node.js
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
 
     - name: Install dependencies
-      working-directory: Famledger-frontend
       run: npm ci
-      
+
     - name: Build Next.js (standalone)
-      working-directory: Famledger-frontend
       run: npm run build
 
     - name: Prepare deployment folder
-      working-directory: Famledger-frontend
       run: |
         mkdir deploy
         cp -r .next/standalone/* deploy/
@@ -43,7 +39,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: next-app
-        path: Famledger-frontend/deploy
+        path: deploy
 
   deploy:
     runs-on: ubuntu-latest

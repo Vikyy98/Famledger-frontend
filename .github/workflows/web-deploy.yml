@@ -2,7 +2,7 @@ name: FamLedger Web CI/CD to Azure
 
 on:
   push:
-    branches: master
+    branches: [master]
   workflow_dispatch:
 
 env:
@@ -23,41 +23,39 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        working-directory: .
 
-      - name: Build Next.js (Standalone)
+      - name: Build Next.js
         run: npm run build
-        working-directory: .
 
       - name: Debug .next folder
         run: |
           echo "--- .next contents ---"
-          ls -la .next || echo ".next not found"
-          echo "--- .next/standalone contents ---"
-          ls -la .next/standalone || echo "standalone folder NOT FOUND"
-        working-directory: .
+          ls -R .next
 
-      - name: Prepare deployment folder (safe copy)
+      - name: Prepare deploy folder for Next.js 16
         run: |
-          set -e
           rm -rf deploy || true
           mkdir deploy
-          # copy standalone output
-          rsync -av .next/standalone/ deploy/
-          # copy client static files
+
+          echo "Copying Next.js server output"
+          rsync -av .next/server/ deploy/server/
+
+          echo "Copying static assets"
           mkdir -p deploy/.next/static
           rsync -av .next/static/ deploy/.next/static/
-          # copy public assets
+
+          echo "Copying public folder"
           rsync -av public/ deploy/public/
+
+          echo "Copying root server.js"
+          cp server.js deploy/
+
+          echo "Copying package files"
           cp package.json deploy/
           cp package-lock.json deploy/ || true
-        working-directory: .
 
-      - name: Verify deploy package
-        run: |
-          echo "===== deploy folder ====="
-          ls -R deploy
-        working-directory: .
+      - name: Verify deploy folder
+        run: ls -R deploy
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

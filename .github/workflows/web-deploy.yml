@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Build Next.js app
+    - name: Build Next.js (Standalone)
       run: npm run build
 
     - name: Prepare deployment folder
@@ -47,15 +47,19 @@ jobs:
     needs: build
 
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v4
       with:
         name: next-app
-        path: ./next-app
+        path: next-app
 
-    - name: Deploy to Azure
+    - name: Zip deployment package
+      run: |
+        cd next-app
+        zip -r ../app.zip .
+
+    - name: Deploy to Azure WebApp
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEB_PUBLISH_PROFILE }}
-        package: ./next-app
+        package: ./app.zip

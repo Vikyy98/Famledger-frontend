@@ -24,3 +24,12 @@ export interface IncomeResponse {
   recurringIncomeCount: number;
   percentageDifference: string;
 }
+
+export interface IncomeCategory {
+  categoryId: number;
+  categoryName: string;
+}
+
+export interface IncomeCategoriesResponse {
+  categories: IncomeCategory[];
+}

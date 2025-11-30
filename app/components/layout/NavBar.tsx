@@ -1,13 +1,24 @@
 "use client";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { navItems } from "./SideBar";
 import { useAppSelector } from "@/app/hooks/useAuth";
 
 function NavBar() {
   const pathName = usePathname();
-  const currentPageName = navItems.find((n) => n.href == pathName)?.name;
   const user = useAppSelector((state) => state.auth.user);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Use consistent defaults for initial render (server and first client render)
+  const currentPageName = isClient 
+    ? navItems.find((n) => n.href === pathName)?.name || "Dashboard"
+    : "Dashboard";
+  
+  const displayUserName = isClient ? (user?.name || "") : "";
 
   return (
     <div>
@@ -16,7 +27,7 @@ function NavBar() {
         <div>
           <h1 className="text-xl font-semibold">{currentPageName}</h1>
           <h2 className="text-sm font-normal text-gray-500">
-            Welcome Back {user?.name}
+            {displayUserName ? `Welcome Back ${displayUserName}` : "Welcome Back"}
           </h2>
         </div>
 
@@ -57,13 +68,13 @@ function NavBar() {
           {/* User Profile / Family */}
           <div className="flex items-center space-x-2">
             <div className="text-right">
-              <div className="text-sm font-semibold">{user?.name}</div>
+              <div className="text-sm font-semibold">{displayUserName || "User"}</div>
               <div className="text-xs text-gray-500">
-                {user?.familyName} Family
+                {isClient && user?.familyName ? `${user.familyName} Family` : "Family"}
               </div>
             </div>
             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
-              {user?.name[0].toUpperCase()}
+              {(displayUserName?.[0] || "U").toUpperCase()}
             </div>
           </div>
         </div>

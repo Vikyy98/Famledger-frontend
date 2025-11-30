@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./baseAPI";
-import { IncomeResponse } from "../../types/income";
+import { IncomeResponse, IncomeCategory, IncomeCategoriesResponse } from "../../types/income";
 
 const incomeApi = createApi({
   reducerPath: "incomeApi",
@@ -9,8 +9,11 @@ const incomeApi = createApi({
     getIncomeDetails: builder.query<IncomeResponse, number>({
       query: (familyId) => `/income/details/${familyId}`,
     }),
+    getIncomeCategories: builder.query<IncomeCategoriesResponse, void>({
+      query: () => `/income/categories`,
+    }),
   }),
 });
 
-export const { useGetIncomeDetailsQuery } = incomeApi;
+export const { useGetIncomeDetailsQuery, useGetIncomeCategoriesQuery } = incomeApi;
 export default incomeApi;

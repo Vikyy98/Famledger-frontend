@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import TableContainer from "../shared/TableContainer";
 import AddButton from "../shared/AddButton";
+import AddIncomeModal, { IncomeFormData } from "./AddIncomeModal";
 import { Edit, Trash } from "lucide-react";
 
 type IncomeTableProps = {
@@ -22,11 +23,62 @@ interface IncomeTableState {
 }
 
 const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
+  // Modal state management
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Handle opening the modal
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // Handle form submission from modal
+  const handleSubmitIncome = (formData: IncomeFormData) => {
+    // TODO: Integrate with your API to save the income
+    // Example: You can use a mutation hook from your API service
+    console.log("Income form data:", formData);
+    
+    // After successful submission, you might want to:
+    // 1. Refetch the income data
+    // 2. Update the local state
+    // 3. Show a success message
+    
+    // Example API call (uncomment and adjust based on your API):
+    // await addIncomeMutation(formData);
+  };
+
+  // Check if incomeTableDetails is empty or has no items
+  if (!incomeTableDetails || incomeTableDetails.length === 0) {
+    return (
+      <>
+        <TableContainer
+          title="Income Sources"
+          action={<AddButton label="Add Income" onClick={handleOpenModal} />}
+        >
+          <div className="py-12 text-center text-gray-500">
+            <p className="text-lg">No items found</p>
+            <p className="text-sm mt-2">Add your first income source to get started</p>
+          </div>
+        </TableContainer>
+        <AddIncomeModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmitIncome}
+        />
+      </>
+    );
+  }
+
   return (
-    <TableContainer
-      title="Income Sources"
-      action={<AddButton label="Add Income" />}
-    >
+    <>
+      <TableContainer
+        title="Income Sources"
+        action={<AddButton label="Add Income" onClick={handleOpenModal} />}
+      >
       <table className="min-w-full text-sm table-auto">
         <thead className="border-b bg-gray-50 text-left text-gray-600">
           <tr>
@@ -73,7 +125,13 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
           })}
         </tbody>
       </table>
-    </TableContainer>
+      </TableContainer>
+      <AddIncomeModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmitIncome}
+      />
+    </>
   );
 };
 

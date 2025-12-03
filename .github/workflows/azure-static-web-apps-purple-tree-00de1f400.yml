@@ -21,31 +21,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          submodules: true
-          lfs: false
 
-      # Ensure the runner uses Node >= 20.9.0 for the build
       - name: Use Node.js 20.9.0
         uses: actions/setup-node@v4
         with:
           node-version: '20.9.0'
 
-      # Install dependencies (uses node 20.9.0)
       - name: Install dependencies
         run: npm ci
 
-      # Build Next.js (generates .next)
       - name: Build Next.js app
         run: npm run build
-
-      # Optional: run tests or lint here if you have them
-      # - name: Run tests
-      #   run: npm test
-
-      # Get GitHub OIDC id token to pass to Azure deploy action
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
 
       - name: Get Id Token
         uses: actions/github-script@v6
@@ -56,16 +42,14 @@ jobs:
             return await coredemo.getIDToken();
           result-encoding: string
 
-      # Deploy the already-built .next folder to Azure Static Web Apps
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PURPLE_TREE_00DE1F400 }}
           action: upload
-          app_location: "/"          # root of repo
-          api_location: ""           # no api folder
-          output_location: ".next"   # pre-built Next.js output
+          app_location: "/"
+          output_location: ".next"
           github_id_token: ${{ steps.idtoken.outputs.result }}
 
   close_pull_request_job:
@@ -74,7 +58,6 @@ jobs:
     name: Close Pull Request Job
     steps:
       - name: Close Pull Request
-        id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
-          action: "close"
+          action: close

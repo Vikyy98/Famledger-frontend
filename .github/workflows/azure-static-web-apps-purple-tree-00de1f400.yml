@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-      id-token: write
       contents: read
 
     steps:
@@ -33,15 +32,6 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
-        with:
-          script: |
-            const coredemo = require('@actions/core');
-            return await coredemo.getIDToken();
-          result-encoding: string
-
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -50,7 +40,6 @@ jobs:
           action: upload
           app_location: "/"
           output_location: ".next"
-          github_id_token: ${{ steps.idtoken.outputs.result }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

@@ -89,6 +89,7 @@ const quickActions = [
 ];
 
 function DashboardPage() {
+  console.log("API:", process.env.NEXT_PUBLIC_API_BASE_URL);
   return (
     <MainLayout>
       <div className="space-y-6">

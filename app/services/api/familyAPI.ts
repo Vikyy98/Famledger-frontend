@@ -8,7 +8,7 @@ const familyApi = createApi({
   endpoints: (builder) => ({
     createFamily: builder.mutation<FamilyReponse, FamilyRequest>({
       query: (familyDetails) => ({
-        url: "/family",
+        url: "/families",
         method: "POST",
         body: familyDetails,
       }),

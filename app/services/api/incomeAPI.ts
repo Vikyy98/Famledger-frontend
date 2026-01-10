@@ -7,7 +7,7 @@ const incomeApi = createApi({
   baseQuery: baseQuery,
   endpoints: (builder) => ({
     getIncomeDetails: builder.query<IncomeResponse, number>({
-      query: (familyId) => `/income/details/${familyId}`,
+      query: (familyId) => `/families/${familyId}/incomes`,
     }),
     getIncomeCategories: builder.query<IncomeCategoriesResponse, void>({
       query: () => `/income/categories`,

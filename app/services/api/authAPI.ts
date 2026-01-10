@@ -9,14 +9,14 @@ const authApi = createApi({
     // Define your authentication endpoints here
     registerUser: builder.mutation({
       query: (userData: RegisterRequest) => ({
-        url: "/auth/register",
+        url: "/users",
         method: "POST",
         body: userData,
       }),
     }),
     loginUser: builder.mutation<LoginResponse, LoginRequest>({
       query: (loginDetails) => ({
-        url: "/auth/login",
+        url: "/auth/token",
         method: "POST",
         body: loginDetails,
       }),

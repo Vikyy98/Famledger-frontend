@@ -1,15 +1,13 @@
 export interface IncomeDetails {
   incomeId: number;
   userId: number;
-  memberName: string; // Corrected typo from MemeberName
   familyId: number;
-  source: number;
-  sourceName: string;
-  category: number;
+  source: string;
+  categoryId: number;
   categoryName: string;
-  type: number;
+  typeId: number;
   typeName: string;
-  amount: string;
+  amount: number;
   status: boolean;
   createdOn: Date;
   updateOn: Date;
@@ -18,11 +16,11 @@ export interface IncomeDetails {
 export interface IncomeResponse {
   userId: number;
   familyId: number;
-  totalIncome: string;
-  totalRecurringIncome: string;
+  totalIncome: number;
+  totalRecurringIncome: number;
   incomes: IncomeDetails[];
   recurringIncomeCount: number;
-  percentageDifference: string;
+  percentageDifference: number;
 }
 
 export interface IncomeCategory {

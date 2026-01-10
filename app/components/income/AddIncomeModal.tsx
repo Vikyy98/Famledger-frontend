@@ -38,7 +38,7 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
     isError: isCategoriesError,
   } = useGetIncomeCategoriesQuery();
 
-  // Extract categories from API response
+  // Extract categories from API response - Checking for undefined data
   const categories = categoriesData?.categories || [];
 
   // Handle form input changes
@@ -182,8 +182,8 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
                 isLoadingCategories
                   ? "Loading categories..."
                   : isCategoriesError
-                  ? "Failed to load categories"
-                  : "Select category"
+                    ? "Failed to load categories"
+                    : "Select category"
               }
               disabled={isLoadingCategories || isCategoriesError}
               isLoading={isLoadingCategories}

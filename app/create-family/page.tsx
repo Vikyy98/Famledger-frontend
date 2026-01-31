@@ -46,7 +46,7 @@ export default function CreateFamilySection() {
     const inputType = activeTab === "create" ? 1 : 2;
 
     const familyDetails: FamilyRequest = {
-      userId: user?.userId,
+      userId: user?.id || 0,
       familyName,
       invitationLink,
       familyDetailType: inputType,

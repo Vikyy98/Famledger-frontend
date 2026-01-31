@@ -12,7 +12,7 @@ export interface RegisterRequest {
 }
 
 export interface UserDetails {
-  userId: number;
+  id: number;
   familyId: number;
   name: string;
   email: string;

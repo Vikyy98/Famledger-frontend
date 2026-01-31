@@ -2,7 +2,7 @@ import React from "react";
 import { DollarSign } from "lucide-react";
 
 type RecurringIncomeCardProps = {
-  totalRecurringIncomeAmount: string;
+  totalRecurringIncomeAmount: number;
   recurringIncomeCount: number;
 };
 

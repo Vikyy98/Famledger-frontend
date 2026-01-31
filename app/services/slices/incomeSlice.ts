@@ -4,10 +4,10 @@ import { IncomeResponse } from "../../types/income";
 const initialState: IncomeResponse = {
   userId: 0,
   familyId: 0,
-  totalIncome: "",
-  totalRecurringIncome: "",
+  totalIncome: 0,
+  totalRecurringIncome: 0,
   recurringIncomeCount: 0,
-  percentageDifference: "",
+  percentageDifference: 0,
   incomes: [],
 };
 

@@ -3,9 +3,9 @@ import InfoTooltip from "../shared/InfoTooltip";
 import { TrendingUp } from "lucide-react";
 
 type IncomeSummaryProps = {
-  totalIncome: string;
-  totalRecurringIncome: string;
-  percentageDifference: string;
+  totalIncome: number;
+  totalRecurringIncome: number;
+  percentageDifference: number;
 };
 
 const IncomeSummary: React.FC<IncomeSummaryProps> = ({

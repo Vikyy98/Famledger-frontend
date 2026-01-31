@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import IncomeSummary from "../components/income/IncomeSummary";
 import RecurringIncomeCard from "../components/income/RecurringIncomeCard";
@@ -11,7 +11,6 @@ import IncomeSummarySkeleton from "../components/income/IncomeSummarySkeleton";
 import { AlertTriangle } from "lucide-react";
 import RecurringIncomeCardSkeleton from "../components/income/RecurringIncomeCardSkeleton";
 import IncomeTableSkeleton from "../components/income/IncomeTableSkeleton";
-import axios from "axios";
 
 const IncomePage: React.FC = () => {
   const { data, isSuccess, isLoading, error, isError } =

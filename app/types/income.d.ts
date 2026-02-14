@@ -1,14 +1,13 @@
 export interface IncomeDetails {
-  incomeId: number;
+  Id: number;
   userId: number;
   familyId: number;
   source: string;
-  categoryId: number;
-  categoryName: string;
-  typeId: number;
-  typeName: string;
+  type: number;
   amount: number;
   status: boolean;
+  frequency?: string; // For recurring income, specify frequency in days
+  dateReceived: string; // ISO date string
   createdOn: Date;
   updateOn: Date;
 }
@@ -23,11 +22,12 @@ export interface IncomeResponse {
   percentageDifference: number;
 }
 
-export interface IncomeCategory {
-  categoryId: number;
-  categoryName: string;
-}
-
-export interface IncomeCategoriesResponse {
-  categories: IncomeCategory[];
+export interface AddIncomeRequest {
+  familyId?: number;
+  userId?: number;
+  source: string;
+  type: number;
+  amount: number;
+  frequency?: string; // For recurring income, specify frequency in days
+  dateReceived: string; // ISO date string
 }

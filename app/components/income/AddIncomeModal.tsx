@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { X, Calendar, Briefcase, Tag, Loader2 } from "lucide-react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
-import { useGetIncomeCategoriesQuery } from "../../services/api/incomeAPI";
 
 interface AddIncomeModalProps {
   isOpen: boolean;
@@ -12,7 +11,6 @@ interface AddIncomeModalProps {
 
 export interface IncomeFormData {
   source: string;
-  category: string; // This will store categoryId as string
   amount: string;
   date: string;
 }
@@ -24,22 +22,11 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<IncomeFormData>({
     source: "",
-    category: "",
     amount: "",
     date: "",
   });
 
   const [errors, setErrors] = useState<Partial<IncomeFormData>>({});
-
-  // Fetch income categories from API
-  const {
-    data: categoriesData,
-    isLoading: isLoadingCategories,
-    isError: isCategoriesError,
-  } = useGetIncomeCategoriesQuery();
-
-  // Extract categories from API response - Checking for undefined data
-  const categories = categoriesData?.categories || [];
 
   // Handle form input changes
   const handleChange = (
@@ -67,10 +54,6 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
       newErrors.source = "Source is required";
     }
 
-    if (!formData.category) {
-      newErrors.category = "Category is required";
-    }
-
     if (!formData.amount.trim()) {
       newErrors.amount = "Amount is required";
     } else if (isNaN(parseFloat(formData.amount)) || parseFloat(formData.amount) <= 0) {
@@ -94,7 +77,6 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
       // Reset form after successful submission
       setFormData({
         source: "",
-        category: "",
         amount: "",
         date: "",
       });
@@ -107,7 +89,6 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
   const handleClose = () => {
     setFormData({
       source: "",
-      category: "",
       amount: "",
       date: "",
     });
@@ -163,38 +144,6 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
             icon={<Briefcase className="w-4 h-4" />}
             error={errors.source}
           />
-
-          {/* Category Dropdown */}
-          <div>
-            <Input
-              label="Category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              icon={<Tag className="w-4 h-4" />}
-              error={errors.category}
-              select
-              options={categories.map((cat) => ({
-                value: cat.categoryId.toString(),
-                label: cat.categoryName,
-              }))}
-              selectPlaceholder={
-                isLoadingCategories
-                  ? "Loading categories..."
-                  : isCategoriesError
-                    ? "Failed to load categories"
-                    : "Select category"
-              }
-              disabled={isLoadingCategories || isCategoriesError}
-              isLoading={isLoadingCategories}
-              loadingIcon={<Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
-            />
-            {isCategoriesError && !errors.category && (
-              <span className="text-xs text-yellow-600 mt-1 block">
-                Unable to load categories. Please try again later.
-              </span>
-            )}
-          </div>
 
           {/* Amount Input */}
           <Input

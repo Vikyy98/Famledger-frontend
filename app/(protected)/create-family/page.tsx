@@ -3,12 +3,12 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Link, Users } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "../hooks/useAuth";
-import { FamilyRequest } from "../types/family";
+import { useAppDispatch, useAppSelector } from "@/app/hooks/useAuth";
+import { FamilyRequest } from "@/app/types/family";
 import { useRouter } from "next/navigation";
-import Button from "../components/ui/Button";
-import { useCreateFamilyMutation } from "../services/api/familyAPI";
-import { setFamilyDetails } from "../services/slices/familySlice";
+import Button from "@/app/components/ui/Button";
+import { useCreateFamilyMutation } from "@/app/services/api/familyAPI";
+import { setFamilyDetails } from "@/app/services/slices/familySlice";
 
 export default function CreateFamilySection() {
   const [activeTab, setActiveTab] = useState<"create" | "join">("create");
@@ -63,9 +63,7 @@ export default function CreateFamilySection() {
 
   return (
     <div className="flex items-center justify-between max-w-7xl mx-auto py-24 px-6">
-      {/* LEFT SIDE */}
       <div className="w-[55%] space-y-8">
-        {/* Title */}
         <div className="space-y-1">
           <h1 className="text-5xl font-bold leading-tight">
             {"Let's"} start tracking your <br /> family expenses
@@ -77,7 +75,6 @@ export default function CreateFamilySection() {
           </p>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-4">
           <button
             onClick={() => {
@@ -120,7 +117,6 @@ export default function CreateFamilySection() {
           </button>
         </div>
 
-        {/* Input Forms */}
         {activeTab === "create" && (
           <div className="space-y-3">
             <label className="text-gray-800 font-medium">Family Name</label>
@@ -189,13 +185,11 @@ export default function CreateFamilySection() {
           </div>
         )}
 
-        {/* API error (from server) */}
         {error && (
           <p className="text-red-600 text-sm mt-2">Something went wrong!</p>
         )}
       </div>
 
-      {/* RIGHT SIDE IMAGE */}
       <div className="w-[45%] flex justify-center">
         <Image
           src="/family-illustration.png"

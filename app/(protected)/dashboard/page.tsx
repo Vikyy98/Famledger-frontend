@@ -1,17 +1,13 @@
-// pages/dashboard.tsx (or components/DashboardPage.tsx)
 import {
   ArrowUp,
-  ArrowDown,
   TrendingUp,
-  TrendingDown,
   Plus,
   Minus,
   Target,
   Eye,
 } from "lucide-react";
-import MainLayout from "../components/layout/MainLayout";
+import MainLayout from "@/app/components/layout/MainLayout";
 
-// Placeholder for data
 const summaryData = [
   {
     title: "Total Income",
@@ -26,7 +22,7 @@ const summaryData = [
     value: "$8,230",
     change: "+8.2%",
     color: "text-red-500",
-    Icon: ArrowUp, // Use ArrowUp for expense increase, or ArrowDown if tracking decrease
+    Icon: ArrowUp,
     bgColor: "bg-red-50",
   },
   {
@@ -58,7 +54,6 @@ const activityData = [
     amount: "-$1,400",
     color: "text-red-600",
   },
-  // Add more...
 ];
 
 const quickActions = [
@@ -92,7 +87,6 @@ function DashboardPage() {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* 1. Summary Cards */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {summaryData.map((card) => (
             <div
@@ -117,9 +111,7 @@ function DashboardPage() {
           ))}
         </div>
 
-        {/* 2. Monthly Overview and Recent Activity (Two Columns) */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* Monthly Overview (Chart - Placeholder) */}
           <div className="p-6 bg-white border rounded-xl shadow-sm lg:col-span-2">
             <h3 className="text-lg font-semibold text-gray-800">
               Monthly Overview
@@ -134,23 +126,17 @@ function DashboardPage() {
                 Expense
               </span>
             </div>
-
-            {/* Chart Placeholder UI */}
             <div className="h-64 mt-4">
-              {/*  */}
               <div className="flex items-end h-full">
-                {/* Fake bars for visualization */}
                 {["Jan", "Feb", "Mar", "Apr", "May"].map((month, index) => (
                   <div
                     key={month}
                     className="flex flex-col items-center justify-end flex-1 h-full px-2"
                   >
-                    {/* Income Bar (Green) */}
                     <div
                       className="w-6 bg-green-500 rounded-t"
                       style={{ height: `${(index + 3) * 15}px` }}
                     ></div>
-                    {/* Expense Bar (Red) */}
                     <div
                       className="w-6 bg-red-500 rounded-t mt-0.5"
                       style={{ height: `${(index + 2) * 12}px` }}
@@ -160,13 +146,11 @@ function DashboardPage() {
                 ))}
               </div>
               <div className="mt-2 text-xs text-gray-500">
-                {" "}
-                (Chart Data Placeholder){" "}
+                (Chart Data Placeholder)
               </div>
             </div>
           </div>
 
-          {/* Recent Activity */}
           <div className="p-6 bg-white border rounded-xl shadow-sm lg:col-span-1">
             <h3 className="text-lg font-semibold text-gray-800">
               Recent Activity
@@ -192,7 +176,6 @@ function DashboardPage() {
           </div>
         </div>
 
-        {/* 3. Quick Actions */}
         <div className="grid grid-cols-2 gap-6 pt-4 sm:grid-cols-4">
           {quickActions.map((action) => (
             <div

@@ -1,6 +1,5 @@
 "use client";
 
-// common/SideBar.tsx
 import {
   PiggyBank,
   LayoutDashboard,
@@ -12,10 +11,13 @@ import {
   Scale,
   Users,
   Settings,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
+import { useAppDispatch } from "@/app/hooks/useAuth";
+import { logoutUser } from "@/app/services/slices/authSlice";
 
 // Define the navigation items
 export const navItems = [
@@ -30,8 +32,14 @@ export const navItems = [
 ];
 
 function SideBar() {
-  // NOTE: For a real app, you'd use 'useRouter' here to check the current path
-  const activePath = usePathname(); // Placeholder for active link
+  const activePath = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    router.push("/login");
+  };
 
   return (
     <div className="flex flex-col justify-between w-64 h-full p-4 bg-white border-r shadow-lg">
@@ -63,11 +71,18 @@ function SideBar() {
       </aside>
 
       {/* Settings / Footer Area */}
-      <div className="pt-4 border-t">
-        <div className="flex items-center p-3 mt-4 space-x-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+      <div className="pt-4 border-t space-y-1">
+        <div className="flex items-center p-3 space-x-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
           <Settings className="w-5 h-5" />
           <span>Settings</span>
         </div>
+        <button
+          onClick={handleLogout}
+          className="flex items-center w-full p-3 space-x-3 text-sm font-medium text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
       </div>
     </div>
   );

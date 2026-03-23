@@ -11,10 +11,13 @@ import IncomeSummarySkeleton from "@/app/components/income/IncomeSummarySkeleton
 import { AlertTriangle } from "lucide-react";
 import RecurringIncomeCardSkeleton from "@/app/components/income/RecurringIncomeCardSkeleton";
 import IncomeTableSkeleton from "@/app/components/income/IncomeTableSkeleton";
+import { useAppSelector } from "@/app/hooks/useAuth";
 
 const IncomePage: React.FC = () => {
+
+  const user = useAppSelector((state) => state.auth.user);
   const { data, isSuccess, isLoading, error, isError } =
-    useGetIncomeDetailsQuery(1);
+    useGetIncomeDetailsQuery(user?.familyId ?? 0);
 
   if (isError) {
     return (

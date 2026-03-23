@@ -5,11 +5,11 @@ import {
   LayoutDashboard,
   DollarSign,
   Wallet,
-  Target,
-  FileText,
-  Landmark,
-  Scale,
-  Users,
+//  Target,
+//  FileText,
+//  Landmark,
+//  Scale,
+//  Users,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -24,11 +24,11 @@ export const navItems = [
   { name: "Dashboard", href: "/dashboard", Icon: LayoutDashboard },
   { name: "Income", href: "/income", Icon: DollarSign },
   { name: "Expenses", href: "/expense", Icon: Wallet },
-  { name: "Goals", href: "/goals", Icon: Target },
-  { name: "Reports", href: "/reports", Icon: FileText },
-  { name: "Assets", href: "/assets", Icon: Landmark },
-  { name: "Liabilities", href: "/liabilities", Icon: Scale },
-  { name: "Members", href: "/members", Icon: Users },
+//{ name: "Goals", href: "/goals", Icon: Target },
+ // { name: "Reports", href: "/reports", Icon: FileText },
+  //{ name: "Assets", href: "/assets", Icon: Landmark },
+  //{ name: "Liabilities", href: "/liabilities", Icon: Scale },
+  //{ name: "Members", href: "/members", Icon: Users },
 ];
 
 function SideBar() {

@@ -5,9 +5,7 @@ export interface FamilyReponse {
   invitationLink: string;
 }
 
-export interface FamilyRequest {
-  userId: number | undefined;
+/** Body for POST /families — user id comes from JWT only. */
+export interface CreateFamilyRequest {
   familyName: string;
-  invitationLink: string;
-  familyDetailType: number;
 }

@@ -1,37 +1,36 @@
 import {
   ArrowUp,
-  TrendingUp,
   Plus,
   Minus,
   Target,
   Eye,
+  Wallet,
+  PiggyBank,
 } from "lucide-react";
 import MainLayout from "@/app/components/layout/MainLayout";
+import StatCard from "@/app/components/shared/StatCard";
 
 const summaryData = [
   {
     title: "Total Income",
     value: "$12,450",
     change: "+12.5%",
-    color: "text-green-500",
-    Icon: ArrowUp,
-    bgColor: "bg-green-50",
+    icon: Wallet,
+    isPositive: true,
   },
   {
     title: "Total Expenses",
     value: "$8,230",
     change: "+8.2%",
-    color: "text-red-500",
-    Icon: ArrowUp,
-    bgColor: "bg-red-50",
+    icon: ArrowUp,
+    isPositive: false,
   },
   {
     title: "Net Savings",
     value: "$4,220",
     change: "+18.7%",
-    color: "text-blue-500",
-    Icon: TrendingUp,
-    bgColor: "bg-blue-50",
+    icon: PiggyBank,
+    isPositive: true,
   },
 ];
 
@@ -89,25 +88,14 @@ function DashboardPage() {
       <div className="space-y-6">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           {summaryData.map((card) => (
-            <div
+            <StatCard
               key={card.title}
-              className="p-6 bg-white border rounded-xl shadow-sm"
-            >
-              <div className="flex items-start justify-between">
-                <p className="text-sm font-medium text-gray-500">
-                  {card.title}
-                </p>
-                <div
-                  className={`flex items-center text-xs font-semibold ${card.color}`}
-                >
-                  <card.Icon className="w-3 h-3 mr-1" />
-                  {card.change}
-                </div>
-              </div>
-              <p className="mt-1 text-3xl font-bold text-gray-900">
-                {card.value}
-              </p>
-            </div>
+              title={card.title}
+              value={card.value}
+              change={card.change}
+              isPositive={card.isPositive}
+              icon={<card.icon className="h-5 w-5" />}
+            />
           ))}
         </div>
 

@@ -79,16 +79,17 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
         <table className="min-w-full text-sm table-auto">
           <thead className="border-b bg-gray-50 text-left text-gray-600">
             <tr>
-              <th className="py-3 px-4 font-medium w-1/5">Member</th>
-              <th className="py-3 px-4 font-medium w-1/5">Source</th>
-              <th className="py-3 px-4 font-medium w-1/5">Income Type</th>
-              <th className="py-3 px-4 font-medium w-1/6 text-right">Amount</th>
-              <th className="py-3 px-4 font-medium w-[80px] text-center">Actions</th>
+              <th className="py-3 px-4 font-medium">Member</th>
+              <th className="py-3 px-4 font-medium">Source</th>
+              <th className="py-3 px-4 font-medium">Income Type</th>
+              <th className="py-3 px-4 font-medium">Amount</th>
+              <th className="py-3 px-4 font-medium">Date Received</th>
+              <th className="py-3 px-4 font-medium text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="text-gray-700">
             {incomeTableDetails.map((income) => (
-              <tr key={`${income.type}-${income.Id}`} className="border-b hover:bg-gray-50">
+              <tr key={income.id} className="border-b hover:bg-gray-50">
                 <td className="py-3 px-4">-</td>
                 <td className="py-3 px-4">{income.source}</td>
                 <td className="py-3 px-4">
@@ -96,7 +97,8 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
                     <span className="border bg-blue-200 text-blue-800 rounded-md text-center w-1/3">{income.type}</span>
                   </div>
                 </td>
-                <td className="py-3 px-4 text-right">{income.amount}</td>
+                <td className="py-3 px-4">{income.amount}</td>
+                <td className="py-3 px-4">{income.dateReceived}</td>
                 <td className="py-3 px-4 flex items-center justify-center space-x-3">
                   <Edit width={18} height={18} className="cursor-pointer text-blue-600 hover:text-blue-800" />
                   <Trash width={18} height={18} className="cursor-pointer text-red-600 hover:text-red-800" />

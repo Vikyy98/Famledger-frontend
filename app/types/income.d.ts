@@ -1,5 +1,5 @@
 export interface IncomeDetails {
-  Id: number;
+  id: number;
   userId: number;
   familyId: number;
   source: string;

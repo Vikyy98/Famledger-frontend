@@ -3,12 +3,11 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Link, Users } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/app/hooks/useAuth";
-import { FamilyRequest } from "@/app/types/family";
+import { useAppDispatch } from "@/app/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import Button from "@/app/components/ui/Button";
 import { useCreateFamilyMutation } from "@/app/services/api/familyAPI";
-import { setFamilyDetails } from "@/app/services/slices/familySlice";
+import { setUserFamilyId } from "@/app/services/slices/authSlice";
 
 export default function CreateFamilySection() {
   const [activeTab, setActiveTab] = useState<"create" | "join">("create");
@@ -17,7 +16,6 @@ export default function CreateFamilySection() {
   const [localError, setLocalError] = useState("");
 
   const [createFamily, { isLoading, error }] = useCreateFamilyMutation();
-  const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -43,18 +41,18 @@ export default function CreateFamilySection() {
 
     if (!validateInputs()) return;
 
-    const inputType = activeTab === "create" ? 1 : 2;
-
-    const familyDetails: FamilyRequest = {
-      userId: user?.id || 0,
-      familyName,
-      invitationLink,
-      familyDetailType: inputType,
-    };
+    if (activeTab === "join") {
+      setLocalError(
+        "Join via invitation is not available yet — use Create Family for now."
+      );
+      return;
+    }
 
     try {
-      const response = await createFamily(familyDetails).unwrap();
-      dispatch(setFamilyDetails(response));
+      const response = await createFamily({
+        familyName: familyName.trim(),
+      }).unwrap();
+      dispatch(setUserFamilyId(response.familyId));
       router.push("/dashboard");
     } catch (err) {
       console.log("API Error:", err);

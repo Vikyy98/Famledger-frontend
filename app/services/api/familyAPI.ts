@@ -1,16 +1,16 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./baseAPI";
-import { FamilyReponse, FamilyRequest } from "@/app/types/family";
+import { FamilyReponse, CreateFamilyRequest } from "@/app/types/family";
 
 const familyApi = createApi({
   reducerPath: "familyApi",
   baseQuery: baseQuery,
   endpoints: (builder) => ({
-    createFamily: builder.mutation<FamilyReponse, FamilyRequest>({
-      query: (familyDetails) => ({
+    createFamily: builder.mutation<FamilyReponse, CreateFamilyRequest>({
+      query: (body) => ({
         url: "/families",
         method: "POST",
-        body: familyDetails,
+        body,
       }),
     }),
   }),

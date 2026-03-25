@@ -19,7 +19,7 @@ const incomeApi = createApi({
           { type: "Income", id: "LIST" },
           ...incomes.map((inc: IncomeDetails) => ({
             type: "Income" as const,
-            id: inc.Id,
+            id: inc.id,
           })),
         ];
       },

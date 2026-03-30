@@ -13,7 +13,11 @@ export interface IncomeFormData {
   source: string;
   amount: string;
   date: string;
+  incomeType: "ONETIME" | "RECURRING";
+  recurringFrequency: "MONTHLY" | "QUARTERLY" | "YEARLY" | "";
 }
+
+type IncomeFormErrors = Partial<Record<keyof IncomeFormData, string>>;
 
 const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
   isOpen,
@@ -24,9 +28,11 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
     source: "",
     amount: "",
     date: "",
+    incomeType: "ONETIME",
+    recurringFrequency: "",
   });
 
-  const [errors, setErrors] = useState<Partial<IncomeFormData>>({});
+  const [errors, setErrors] = useState<IncomeFormErrors>({});
 
   // Handle form input changes
   const handleChange = (
@@ -48,7 +54,7 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
 
   // Validate form
   const validateForm = (): boolean => {
-    const newErrors: Partial<IncomeFormData> = {};
+    const newErrors: IncomeFormErrors = {};
 
     if (!formData.source.trim()) {
       newErrors.source = "Source is required";
@@ -62,6 +68,17 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
 
     if (!formData.date.trim()) {
       newErrors.date = "Date is required";
+    } else {
+      const selectedDate = new Date(formData.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate > today) {
+        newErrors.date = "Date cannot be later than today";
+      }
+    }
+
+    if (formData.incomeType === "RECURRING" && !formData.recurringFrequency) {
+      newErrors.recurringFrequency = "Frequency is required for recurring income";
     }
 
     setErrors(newErrors);
@@ -79,6 +96,8 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
         source: "",
         amount: "",
         date: "",
+        incomeType: "ONETIME",
+        recurringFrequency: "",
       });
       setErrors({});
       onClose();
@@ -91,6 +110,8 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
       source: "",
       amount: "",
       date: "",
+      incomeType: "ONETIME",
+      recurringFrequency: "",
     });
     setErrors({});
     onClose();
@@ -108,10 +129,10 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+      className="fixed top-0 right-0 bottom-0 left-0 z-[9999] flex items-center justify-center overflow-y-auto bg-gray-900/75 px-4 py-6 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-all">
+      <div className="mx-auto my-6 w-full max-w-md rounded-lg bg-white shadow-xl transform transition-all">
         {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
@@ -157,9 +178,40 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
             error={errors.amount}
           />
 
+          <Input
+            label="Income Type"
+            name="incomeType"
+            value={formData.incomeType}
+            onChange={handleChange}
+            icon={<Tag className="w-4 h-4" />}
+            error={errors.incomeType}
+            select
+            options={[
+              { value: "ONETIME", label: "One Time" },
+              { value: "RECURRING", label: "Recurring" },
+            ]}
+          />
+
+          {formData.incomeType === "RECURRING" && (
+            <Input
+              label="Recurring Frequency"
+              name="recurringFrequency"
+              value={formData.recurringFrequency}
+              onChange={handleChange}
+              icon={<Loader2 className="w-4 h-4" />}
+              error={errors.recurringFrequency}
+              select
+              options={[
+                { value: "MONTHLY", label: "Monthly" },
+                { value: "QUARTERLY", label: "Quarterly" },
+                { value: "YEARLY", label: "Yearly" },
+              ]}
+            />
+          )}
+
           {/* Date Input */}
           <Input
-            label="Date"
+            label="Date received"
             name="date"
             type="date"
             value={formData.date}

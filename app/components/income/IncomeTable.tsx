@@ -16,9 +16,43 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
-  const [addIncomeMutation, { isLoading: isAddingIncome }] = useAddIncomeMutation();
+  const [addIncomeMutation] = useAddIncomeMutation();
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
+
+  const formatIndianDate = (value?: string) => {
+    if (!value) return "-";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleDateString("en-IN");
+  };
+
+  const getIncomeTypeLabel = (type: number) => {
+    if (type === 1) return "Recurring";
+    if (type === 2) return "One Time";
+    return "Unknown";
+  };
+
+  const getFrequencyLabel = (frequency?: string) => {
+    if (!frequency) return "";
+    const normalized = frequency.trim().toUpperCase();
+    if (normalized === "ONETIME") return "";
+    return normalized.charAt(0) + normalized.slice(1).toLowerCase();
+  };
+
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 2,
+    }).format(amount);
+
+  const getMemberDisplayName = (incomeUserId: number) => {
+    if (user?.id === incomeUserId) {
+      return user.name || "You";
+    }
+    return `Member ${incomeUserId}`;
+  };
 
   const handleSubmitIncome = async (formData: IncomeFormData) => {
     console.log("Submitting income with form data:", formData);
@@ -27,8 +61,8 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
       amount: parseFloat(formData.amount),
       userId: user?.id,
       familyId: user?.familyId,
-      type: 1,
-      frequency: "",
+      type: formData.incomeType === "RECURRING" ? 1 : 2,
+      frequency: formData.incomeType === "RECURRING" ? formData.recurringFrequency : "ONETIME",
       dateReceived: formData.date,
     };
     console.log("Income request:", incomeRequest);
@@ -90,16 +124,21 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
           <tbody className="text-gray-700">
             {incomeTableDetails.map((income) => (
               <tr key={income.id} className="border-b hover:bg-gray-50">
-                <td className="py-3 px-4">-</td>
-                <td className="py-3 px-4">{income.source}</td>
-                <td className="py-3 px-4">
-                  <div className="flex flex-col justify-center gap-1 text-[11px] ">
-                    <span className="border bg-blue-200 text-blue-800 rounded-md text-center w-1/3">{income.type}</span>
+                <td className="py-2 px-4">{getMemberDisplayName(income.userId)}</td>
+                <td className="py-2 px-4">{income.source}</td>
+                <td className="py-2 px-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="inline-block rounded-md border bg-blue-100 px-2 py-1 text-[11px] text-blue-800 w-fit">
+                      {getIncomeTypeLabel(income.type)}
+                    </span>
+                    {getFrequencyLabel(income.frequency) && (
+                      <span className="text-[11px] text-gray-500 px-2">{getFrequencyLabel(income.frequency)}</span>
+                    )}
                   </div>
                 </td>
-                <td className="py-3 px-4">{income.amount}</td>
-                <td className="py-3 px-4">{income.dateReceived}</td>
-                <td className="py-3 px-4 flex items-center justify-center space-x-3">
+                <td className="py-2 px-4">{formatCurrency(income.amount)}</td>
+                <td className="py-2 px-4">{formatIndianDate(income.dateReceived)}</td>
+                <td className="py-2 px-4 flex items-center justify-center space-x-3">
                   <Edit width={18} height={18} className="cursor-pointer text-blue-600 hover:text-blue-800" />
                   <Trash width={18} height={18} className="cursor-pointer text-red-600 hover:text-red-800" />
                 </td>

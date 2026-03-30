@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## FamLedger Frontend
+
+Next.js frontend for FamLedger. It includes authentication, protected routes, dashboard modules, and income management UI.
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies and run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Requirements
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Node.js `>=20 <21`
+- Backend API running locally (CORS already configured for `http://localhost:3000`)
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run dev` - start local dev server
+- `npm run build` - production build
+- `npm run start` - run production build
+- `npm run lint` - run eslint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## App Structure (high level)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `app/(protected)` - authenticated pages
+- `app/components` - reusable UI and feature components
+- `app/services/api` - RTK Query API clients
+- `app/services/slices` - Redux slices
+- `app/types` - TypeScript contracts
 
-## Deploy on Vercel
+## Income Module Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Add Income modal supports:
+  - income type (`One Time` / `Recurring`)
+  - recurring frequency (`Monthly`, `Quarterly`, `Yearly`) when recurring is selected
+  - date validation (no future date)
+- Income table now shows:
+  - member label
+  - readable income type
+  - frequency in same column (below type)
+  - INR currency format
+  - Indian date format
+- Sorting is handled by backend response order (latest updated first).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API Integration
+
+- Base API integration uses RTK Query in `app/services/api`.
+- Income endpoints currently used:
+  - `GET /api/families/{familyId}/incomes`
+  - `POST /api/income`

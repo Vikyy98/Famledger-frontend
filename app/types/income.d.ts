@@ -8,8 +8,8 @@ export interface IncomeDetails {
   status: boolean;
   frequency?: string; // For recurring income, specify frequency in days
   dateReceived: string; // ISO date string
-  createdOn: Date;
-  updateOn: Date;
+  createdOn: string;
+  updatedOn?: string;
 }
 
 export interface IncomeResponse {
@@ -30,4 +30,10 @@ export interface AddIncomeRequest {
   amount: number;
   frequency?: string; // For recurring income, specify frequency in days
   dateReceived: string; // ISO date string
+}
+
+/** routeType = original row type (URL segment); type = desired type from form (body). */
+export interface UpdateIncomeRequest extends AddIncomeRequest {
+  id: number;
+  routeType: number;
 }

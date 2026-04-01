@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import TableContainer from "../shared/TableContainer";
 import AddButton from "../shared/AddButton";
-import AddIncomeModal, { IncomeFormData } from "./AddIncomeModal";
+import IncomeModal, { IncomeFormData } from "./IncomeModal";
 import { Edit, Trash } from "lucide-react";
-import { AddIncomeRequest, IncomeDetails } from "@/app/types/income";
-import { useAddIncomeMutation } from "@/app/services/api/incomeAPI";
+import { AddIncomeRequest, IncomeDetails, UpdateIncomeRequest } from "@/app/types/income";
+import { useAddIncomeMutation, useUpdateIncomeMutation } from "@/app/services/api/incomeAPI";
 import incomeApi from "@/app/services/api/incomeAPI";
 import { useAppSelector, useAppDispatch } from "@/app/hooks/useAuth";
 
@@ -14,11 +14,26 @@ interface IncomeTableState {
 
 const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [selectedIncome, setSelectedIncome] = useState<IncomeDetails | undefined>(undefined);
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
   const [addIncomeMutation] = useAddIncomeMutation();
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => setIsModalOpen(false);
+  const [updateIncomeMutation] = useUpdateIncomeMutation();
+  const handleOpenAddModal = () => {
+    setModalMode("add");
+    setSelectedIncome(undefined);
+    setIsModalOpen(true);
+  };
+  const handleOpenEditModal = (income: IncomeDetails) => {
+    setModalMode("edit");
+    setSelectedIncome(income);
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedIncome(undefined);
+  };
 
   const formatIndianDate = (value?: string) => {
     if (!value) return "-";
@@ -56,37 +71,66 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
 
   const handleSubmitIncome = async (formData: IncomeFormData) => {
     console.log("Submitting income with form data:", formData);
-    const incomeRequest: AddIncomeRequest = {
-      source: formData.source,
-      amount: parseFloat(formData.amount),
-      userId: user?.id,
-      familyId: user?.familyId,
-      type: formData.incomeType === "RECURRING" ? 1 : 2,
-      frequency: formData.incomeType === "RECURRING" ? formData.recurringFrequency : "ONETIME",
-      dateReceived: formData.date,
-    };
-    console.log("Income request:", incomeRequest);
-
     try {
-      // Post to API
-      const created: IncomeDetails = await addIncomeMutation(incomeRequest).unwrap();
-
-      // Update RTK Query cache for `getIncomeDetails` so the table shows the new income immediately
-      if (created && created.familyId) {
+      if (modalMode === "edit" && selectedIncome) {
+        const incomeRequest: AddIncomeRequest = {
+          source: formData.source,
+          amount: parseFloat(formData.amount),
+          userId: user?.id,
+          familyId: user?.familyId,
+          type: selectedIncome.type,
+          frequency:
+            selectedIncome.type === 1
+              ? (selectedIncome.frequency?.trim().toUpperCase() || "MONTHLY")
+              : "ONETIME",
+          dateReceived: formData.date,
+        };
+        const updateRequest: UpdateIncomeRequest = {
+          ...incomeRequest,
+          id: selectedIncome.id,
+          routeType: selectedIncome.type,
+          familyId: selectedIncome.familyId,
+        };
+        const updated: IncomeDetails = await updateIncomeMutation(updateRequest).unwrap();
         dispatch(
           incomeApi.util.updateQueryData(
             "getIncomeDetails",
-            created.familyId,
+            selectedIncome.familyId,
             (draft) => {
-              if (!draft.incomes) draft.incomes = [];
-              draft.incomes.push(created);
-              draft.totalIncome = (draft.totalIncome || 0) + created.amount;
+              if (!draft.incomes) return;
+              const idx = draft.incomes.findIndex(
+                (x) => x.id === selectedIncome.id && x.type === selectedIncome.type
+              );
+              if (idx >= 0) {
+                draft.incomes[idx] = updated;
+              }
             }
           )
+        );
+        return;
+      }
+
+      const incomeRequest: AddIncomeRequest = {
+        source: formData.source,
+        amount: parseFloat(formData.amount),
+        userId: user?.id,
+        familyId: user?.familyId,
+        type: formData.incomeType === "RECURRING" ? 1 : 2,
+        frequency: formData.incomeType === "RECURRING" ? formData.recurringFrequency : "ONETIME",
+        dateReceived: formData.date,
+      };
+      const created: IncomeDetails = await addIncomeMutation(incomeRequest).unwrap();
+      if (created && created.familyId) {
+        dispatch(
+          incomeApi.util.updateQueryData("getIncomeDetails", created.familyId, (draft) => {
+            if (!draft.incomes) draft.incomes = [];
+            draft.incomes.unshift(created);
+          })
         );
       }
     } catch (err) {
       console.error("Failed to add income:", err);
+      throw err;
     }
   };
 
@@ -95,21 +139,21 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
       <>
         <TableContainer
           title="Income Sources"
-          action={<AddButton label="Add Income" onClick={handleOpenModal} />}
+          action={<AddButton label="Add Income" onClick={handleOpenAddModal} />}
         >
           <div className="py-12 text-center text-gray-500">
             <p className="text-lg">No items found</p>
             <p className="text-sm mt-2">Add your first income source to get started</p>
           </div>
         </TableContainer>
-        <AddIncomeModal isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleSubmitIncome} />
+        <IncomeModal mode={modalMode} initialData={selectedIncome} isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleSubmitIncome} />
       </>
     );
   }
 
   return (
     <>
-      <TableContainer title="Income Sources" action={<AddButton label="Add Income" onClick={handleOpenModal} />}>
+      <TableContainer title="Income Sources" action={<AddButton label="Add Income" onClick={handleOpenAddModal} />}>
         <table className="min-w-full text-sm table-auto">
           <thead className="border-b bg-gray-50 text-left text-gray-600">
             <tr>
@@ -139,7 +183,7 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
                 <td className="py-2 px-4">{formatCurrency(income.amount)}</td>
                 <td className="py-2 px-4">{formatIndianDate(income.dateReceived)}</td>
                 <td className="py-2 px-4 flex items-center justify-center space-x-3">
-                  <Edit width={18} height={18} className="cursor-pointer text-blue-600 hover:text-blue-800" />
+                  <Edit onClick={() => handleOpenEditModal(income)} width={18} height={18} className="cursor-pointer text-blue-600 hover:text-blue-800" />
                   <Trash width={18} height={18} className="cursor-pointer text-red-600 hover:text-red-800" />
                 </td>
               </tr>
@@ -148,7 +192,7 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
         </table>
       </TableContainer>
 
-      <AddIncomeModal isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleSubmitIncome} />
+      <IncomeModal mode={modalMode} initialData={selectedIncome} isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleSubmitIncome} />
     </>
   );
 };

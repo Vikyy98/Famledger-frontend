@@ -2,14 +2,18 @@ import React, { useState } from "react";
 import { X, Calendar, Briefcase, Tag, Loader2 } from "lucide-react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
+import { IncomeDetails } from "@/app/types/income";
 
-interface AddIncomeModalProps {
+interface IncomeModalProps {
+  mode: "add" | "edit";
+  initialData?: IncomeDetails;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: IncomeFormData) => void;
+  onSubmit: (data: IncomeFormData) => void | Promise<void>;
 }
 
 export interface IncomeFormData {
+  id?: number;
   source: string;
   amount: string;
   date: string;
@@ -19,17 +23,26 @@ export interface IncomeFormData {
 
 type IncomeFormErrors = Partial<Record<keyof IncomeFormData, string>>;
 
-const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
+const IncomeModal: React.FC<IncomeModalProps> = ({
+  mode,
+  initialData,
   isOpen,
   onClose,
   onSubmit,
 }) => {
+  const toFormData = (data?: IncomeDetails): IncomeFormData => ({
+    id: data?.id,
+    source: data?.source || "",
+    amount: data?.amount?.toString() || "",
+    date: data?.dateReceived || "",
+    incomeType: data?.type === 1 ? "RECURRING" : "ONETIME",
+    recurringFrequency: data?.frequency === "MONTHLY" || data?.frequency === "QUARTERLY" || data?.frequency === "YEARLY"
+      ? data.frequency
+      : "",
+  });
+
   const [formData, setFormData] = useState<IncomeFormData>({
-    source: "",
-    amount: "",
-    date: "",
-    incomeType: "ONETIME",
-    recurringFrequency: "",
+    ...toFormData(initialData),
   });
 
   const [errors, setErrors] = useState<IncomeFormErrors>({});
@@ -77,7 +90,7 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
       }
     }
 
-    if (formData.incomeType === "RECURRING" && !formData.recurringFrequency) {
+    if (mode === "add" && formData.incomeType === "RECURRING" && !formData.recurringFrequency) {
       newErrors.recurringFrequency = "Frequency is required for recurring income";
     }
 
@@ -86,21 +99,30 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    if (!isOpen) return;
+    setFormData(toFormData(initialData));
+    setErrors({});
+  }, [isOpen, initialData]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (validateForm()) {
-      onSubmit(formData);
-      // Reset form after successful submission
-      setFormData({
-        source: "",
-        amount: "",
-        date: "",
-        incomeType: "ONETIME",
-        recurringFrequency: "",
-      });
-      setErrors({});
-      onClose();
+      try {
+        await onSubmit(formData);
+        setFormData({
+          source: "",
+          amount: "",
+          date: "",
+          incomeType: "ONETIME",
+          recurringFrequency: "",
+        });
+        setErrors({});
+        onClose();
+      } catch {
+        // keep modal open on submit failure
+      }
     }
   };
 
@@ -137,10 +159,10 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
-              Add New Income
+              {mode === "add" ? "Add New Income" : "Edit Income"}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Record a new income entry for your family.
+              {mode === "add" ? "Record a new income entry for your family." : "Edit the income entry for your family."}
             </p>
           </div>
           <button
@@ -178,35 +200,61 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
             error={errors.amount}
           />
 
-          <Input
-            label="Income Type"
-            name="incomeType"
-            value={formData.incomeType}
-            onChange={handleChange}
-            icon={<Tag className="w-4 h-4" />}
-            error={errors.incomeType}
-            select
-            options={[
-              { value: "ONETIME", label: "One Time" },
-              { value: "RECURRING", label: "Recurring" },
-            ]}
-          />
+          {mode === "add" ? (
+            <>
+              <Input
+                label="Income Type"
+                name="incomeType"
+                value={formData.incomeType}
+                onChange={handleChange}
+                icon={<Tag className="w-4 h-4" />}
+                error={errors.incomeType}
+                select
+                options={[
+                  { value: "ONETIME", label: "One Time" },
+                  { value: "RECURRING", label: "Recurring" },
+                ]}
+              />
 
-          {formData.incomeType === "RECURRING" && (
-            <Input
-              label="Recurring Frequency"
-              name="recurringFrequency"
-              value={formData.recurringFrequency}
-              onChange={handleChange}
-              icon={<Loader2 className="w-4 h-4" />}
-              error={errors.recurringFrequency}
-              select
-              options={[
-                { value: "MONTHLY", label: "Monthly" },
-                { value: "QUARTERLY", label: "Quarterly" },
-                { value: "YEARLY", label: "Yearly" },
-              ]}
-            />
+              {formData.incomeType === "RECURRING" && (
+                <Input
+                  label="Recurring Frequency"
+                  name="recurringFrequency"
+                  value={formData.recurringFrequency}
+                  onChange={handleChange}
+                  icon={<Loader2 className="w-4 h-4" />}
+                  error={errors.recurringFrequency}
+                  select
+                  options={[
+                    { value: "MONTHLY", label: "Monthly" },
+                    { value: "QUARTERLY", label: "Quarterly" },
+                    { value: "YEARLY", label: "Yearly" },
+                  ]}
+                />
+              )}
+            </>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-medium text-gray-700">Income Type</span>
+                <span className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800">
+                  {formData.incomeType === "RECURRING" ? "Recurring" : "One Time"}
+                </span>
+                <span className="text-xs text-gray-500">Type cannot be changed when editing.</span>
+              </div>
+              {formData.incomeType === "RECURRING" && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-gray-700">Frequency</span>
+                  <span className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800">
+                    {formData.recurringFrequency
+                      ? formData.recurringFrequency.charAt(0) +
+                        formData.recurringFrequency.slice(1).toLowerCase()
+                      : (initialData?.frequency ?? "—")}
+                  </span>
+                  <span className="text-xs text-gray-500">Frequency cannot be changed when editing.</span>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Date Input */}
@@ -233,7 +281,7 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
               Cancel
             </Button>
             <Button type="submit" variant="primary" className="px-6">
-              Save Income
+              {mode === "add" ? "Add Income" : "Save Income"}
             </Button>
           </div>
         </form>
@@ -242,5 +290,5 @@ const AddIncomeModal: React.FC<AddIncomeModalProps> = ({
   );
 };
 
-export default AddIncomeModal;
+export default IncomeModal;
 

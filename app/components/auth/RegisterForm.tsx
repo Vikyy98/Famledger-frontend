@@ -3,12 +3,11 @@
 import React, { useState } from "react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
-import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Home, KeyRound, Lock, Mail, User } from "lucide-react";
 import { useRegisterUserMutation } from "@/app/services/api/authAPI";
-import { RegisterRequest } from "@/app/types/auth";
+import { RegisterRequest, RegistrationMode } from "@/app/types/auth";
 import { useRouter } from "next/navigation";
 
-// --- Constants for Validation ---
 const MIN_PASSWORD_LENGTH = 6;
 
 type FormError = {
@@ -18,28 +17,27 @@ type FormError = {
 function RegisterForm() {
   const router = useRouter();
 
-  // Input State
+  const [registrationMode, setRegistrationMode] =
+    useState<RegistrationMode>("createFamily");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [familyName, setFamilyName] = useState("");
+  const [invitationCode, setInvitationCode] = useState("");
 
-  // UI/Validation State
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState<FormError>({});
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // RTK Query Mutation Hook
-  const [registerUser, { data, isSuccess, isLoading }] =
-    useRegisterUserMutation();
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
 
-  // Client-Side Validation Logic
   const validateForm = () => {
     const errors: FormError = {};
 
-    if (!name.trim()) errors.name = "Full Name is required.";
+    if (!name.trim()) errors.name = "Full name is required.";
     if (!email.trim()) {
-      errors.email = "Email Address is required.";
+      errors.email = "Email is required.";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       errors.email = "Please enter a valid email format.";
     }
@@ -52,11 +50,18 @@ function RegisterForm() {
       errors.confirmPassword = "Passwords do not match.";
     }
 
+    if (registrationMode === "createFamily" && !familyName.trim()) {
+      errors.familyName = "Family name is required.";
+    }
+
+    if (registrationMode === "joinFamily" && !invitationCode.trim()) {
+      errors.invitationCode = "Invitation code is required.";
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  // Submission Handler
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setApiError(null);
@@ -67,19 +72,25 @@ function RegisterForm() {
 
     const userData: RegisterRequest = {
       fullName: name.trim(),
-      familyName: "",
       email: email.trim(),
-      password: password,
-      role: "Admin",
+      password,
+      registrationMode,
+      ...(registrationMode === "createFamily"
+        ? { familyName: familyName.trim() }
+        : { invitationCode: invitationCode.trim() }),
     };
 
     try {
       await registerUser(userData).unwrap();
-      //Route to dashboard
       router.push("/login");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Registration Error:", error);
-      setApiError("Registration failed. Please try again.");
+      const err = error as { data?: string | { message?: string } };
+      const msg =
+        typeof err.data === "string"
+          ? err.data
+          : err.data?.message ?? "Registration failed. Please try again.";
+      setApiError(msg);
     }
   };
 
@@ -93,9 +104,47 @@ function RegisterForm() {
         </div>
       )}
 
-      {/* Full Name */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setRegistrationMode("createFamily");
+            setApiError(null);
+          }}
+          className={`flex flex-col items-start rounded-xl border p-3 text-left transition ${
+            registrationMode === "createFamily"
+              ? "border-blue-500 bg-blue-50 text-blue-800"
+              : "border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          <span className="flex items-center gap-2 font-semibold text-sm">
+            <Home className="h-4 w-4 shrink-0" />
+            Create family
+          </span>
+          <span className="mt-1 text-xs text-gray-500">You are the admin</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setRegistrationMode("joinFamily");
+            setApiError(null);
+          }}
+          className={`flex flex-col items-start rounded-xl border p-3 text-left transition ${
+            registrationMode === "joinFamily"
+              ? "border-blue-500 bg-blue-50 text-blue-800"
+              : "border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          <span className="flex items-center gap-2 font-semibold text-sm">
+            <KeyRound className="h-4 w-4 shrink-0" />
+            Join with code
+          </span>
+          <span className="mt-1 text-xs text-gray-500">From your admin</span>
+        </button>
+      </div>
+
       <Input
-        label="Full Name"
+        label="Full name"
         placeholder="John Doe"
         icon={<User className="w-4 h-4" />}
         value={name}
@@ -103,9 +152,8 @@ function RegisterForm() {
         error={formErrors.name}
       />
 
-      {/* Email */}
       <Input
-        label="Email Address"
+        label="Email"
         placeholder="you@example.com"
         type="email"
         icon={<Mail className="w-4 h-4" />}
@@ -114,7 +162,28 @@ function RegisterForm() {
         error={formErrors.email}
       />
 
-      {/* Password */}
+      {registrationMode === "createFamily" && (
+        <Input
+          label="Family name"
+          placeholder="e.g. The Sharma Family"
+          icon={<Home className="w-4 h-4" />}
+          value={familyName}
+          onChange={(e) => setFamilyName(e.target.value)}
+          error={formErrors.familyName}
+        />
+      )}
+
+      {registrationMode === "joinFamily" && (
+        <Input
+          label="Invitation code"
+          placeholder="Paste the code from your family admin"
+          icon={<KeyRound className="w-4 h-4" />}
+          value={invitationCode}
+          onChange={(e) => setInvitationCode(e.target.value)}
+          error={formErrors.invitationCode}
+        />
+      )}
+
       <Input
         label="Password"
         placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
@@ -131,9 +200,8 @@ function RegisterForm() {
         error={formErrors.password}
       />
 
-      {/* Confirm Password */}
       <Input
-        label="Confirm Password"
+        label="Confirm password"
         placeholder="Re-enter password"
         type={showPassword ? "text" : "password"}
         icon={<Lock className="w-4 h-4" />}
@@ -148,12 +216,11 @@ function RegisterForm() {
         error={formErrors.confirmPassword}
       />
 
-      {/* Info text */}
       <div className="text-xs text-gray-500 text-center">
-        Free forever • No credit card required • Cancel anytime
+        You must belong to a family — create one or use an invite code from an
+        admin.
       </div>
 
-      {/* Submit Button */}
       <Button
         isLoading={isLoading}
         type="submit"
@@ -161,10 +228,9 @@ function RegisterForm() {
         className="w-full"
         disabled={isLoading}
       >
-        {isLoading ? "Registering..." : "Create New Account"}
+        {isLoading ? "Creating account…" : "Create account"}
       </Button>
 
-      {/* Terms Note */}
       <p className="text-xs text-gray-500 text-center">
         By signing up, you agree to our{" "}
         <a href="#" className="text-blue-600 underline hover:text-blue-700">

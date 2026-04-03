@@ -1,12 +1,13 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useMemo } from "react";
 import MainLayout from "@/app/components/layout/MainLayout";
 import IncomeSummary from "@/app/components/income/IncomeSummary";
 import RecurringIncomeCard from "@/app/components/income/RecurringIncomeCard";
 import IncomeTrendChart from "@/app/components/income/IncomeTrendChart";
 import IncomeTable from "@/app/components/income/IncomeTable";
 import { useGetIncomeDetailsQuery } from "@/app/services/api/incomeAPI";
+import { useGetFamilyMembersQuery } from "@/app/services/api/familyAPI";
 import IncomeSummarySkeleton from "@/app/components/income/IncomeSummarySkeleton";
 import { AlertTriangle } from "lucide-react";
 import RecurringIncomeCardSkeleton from "@/app/components/income/RecurringIncomeCardSkeleton";
@@ -16,6 +17,18 @@ import { useAppSelector } from "@/app/hooks/useAuth";
 const IncomePage: React.FC = () => {
 
   const user = useAppSelector((state) => state.auth.user);
+  const familyId = user?.familyId;
+  const { data: members = [] } = useGetFamilyMembersQuery(familyId ?? 0, {
+    skip: !familyId,
+  });
+  const memberNamesByUserId = useMemo(() => {
+    const map: Record<number, string> = {};
+    for (const m of members) {
+      map[m.id] = m.fullName;
+    }
+    return map;
+  }, [members]);
+
   const { data, isSuccess, isLoading, error, isError } =
     useGetIncomeDetailsQuery(user?.familyId ?? 0);
 
@@ -63,7 +76,10 @@ const IncomePage: React.FC = () => {
 
         <Suspense fallback={<IncomeTableSkeleton />}>
           {isDataReady ? (
-            <IncomeTable incomeTableDetails={data.incomes} />
+            <IncomeTable
+              incomeTableDetails={data.incomes}
+              memberNamesByUserId={memberNamesByUserId}
+            />
           ) : (
             <IncomeTableSkeleton />
           )}

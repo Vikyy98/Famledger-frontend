@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "./baseAPI";
 import {
   AddIncomeRequest,
+  DeleteIncomeArgs,
   IncomeDetails,
   IncomeResponse,
   UpdateIncomeRequest,
@@ -42,8 +43,20 @@ const incomeApi = createApi({
       }),
       invalidatesTags: [{ type: "Income", id: "LIST" }],
     }),
+    deleteIncome: builder.mutation<void, DeleteIncomeArgs>({
+      query: ({ id, familyId, routeType }) => ({
+        url: `/families/${familyId}/incomes/${id}/${routeType}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Income", id: "LIST" }],
+    }),
   }),
 });
 
-export const { useGetIncomeDetailsQuery, useAddIncomeMutation, useUpdateIncomeMutation } = incomeApi;
+export const {
+  useGetIncomeDetailsQuery,
+  useAddIncomeMutation,
+  useUpdateIncomeMutation,
+  useDeleteIncomeMutation,
+} = incomeApi;
 export default incomeApi;

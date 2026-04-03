@@ -37,3 +37,10 @@ export interface UpdateIncomeRequest extends AddIncomeRequest {
   id: number;
   routeType: number;
 }
+
+/** routeType = income row kind (1 recurring, 2 one-time) for URL segment */
+export interface DeleteIncomeArgs {
+  id: number;
+  familyId: number;
+  routeType: number;
+}

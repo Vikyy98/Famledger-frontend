@@ -3,20 +3,25 @@ export interface AuthState {
   user: UserDetails | null;
 }
 
+export type RegistrationMode = "createFamily" | "joinFamily";
+
 export interface RegisterRequest {
   fullName: string;
-  familyName?: string;
   email: string;
   password: string;
-  role?: "User" | "Admin";
+  registrationMode: RegistrationMode;
+  /** Required when registrationMode is createFamily */
+  familyName?: string;
+  /** Required when registrationMode is joinFamily */
+  invitationCode?: string;
 }
 
 export interface UserDetails {
   id: number;
-  familyId: number;
+  familyId?: number;
   name: string;
   email: string;
-  familyName: string;
+  familyName?: string | null;
   role: string;
   token: string;
 }

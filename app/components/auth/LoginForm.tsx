@@ -68,11 +68,13 @@ export default function LoginForm() {
       console.log("Login successful", response.user);
       dispatch(setUserDetails(response));
 
-      //If there is no family - First time login
-      if (response.user.familyName == null && response.user.familyId == 0) {
+      const familyId = response.user.familyId ?? 0;
+      const hasFamily =
+        familyId > 0 && response.user.familyName != null && response.user.familyName !== "";
+
+      if (!hasFamily) {
         router.push("/create-family");
       } else {
-        //Already user has family assigned
         router.push("/dashboard");
       }
     } catch (error) {

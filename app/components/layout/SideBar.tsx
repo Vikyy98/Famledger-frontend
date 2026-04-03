@@ -12,6 +12,7 @@ import {
 //  Users,
   Settings,
   LogOut,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -28,7 +29,7 @@ export const navItems = [
  // { name: "Reports", href: "/reports", Icon: FileText },
   //{ name: "Assets", href: "/assets", Icon: Landmark },
   //{ name: "Liabilities", href: "/liabilities", Icon: Scale },
-  //{ name: "Members", href: "/members", Icon: Users },
+  { name: "Members", href: "/members", Icon: Users },
 ];
 
 function SideBar() {

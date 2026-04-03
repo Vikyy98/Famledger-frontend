@@ -1,25 +1,42 @@
 import React, { useState } from "react";
 import TableContainer from "../shared/TableContainer";
 import AddButton from "../shared/AddButton";
+import ConfirmModal from "../shared/ConfirmModal";
 import IncomeModal, { IncomeFormData } from "./IncomeModal";
 import { Edit, Trash } from "lucide-react";
 import { AddIncomeRequest, IncomeDetails, UpdateIncomeRequest } from "@/app/types/income";
-import { useAddIncomeMutation, useUpdateIncomeMutation } from "@/app/services/api/incomeAPI";
+import {
+  useAddIncomeMutation,
+  useDeleteIncomeMutation,
+  useUpdateIncomeMutation,
+} from "@/app/services/api/incomeAPI";
 import incomeApi from "@/app/services/api/incomeAPI";
 import { useAppSelector, useAppDispatch } from "@/app/hooks/useAuth";
+import {
+  INCOME_DELETE_CONFIRM_MESSAGE,
+  INCOME_DELETE_CONFIRM_TITLE,
+} from "./deleteIncomeMessages";
 
 interface IncomeTableState {
   incomeTableDetails: IncomeDetails[];
+  /** Resolved from GET /families/{id}/members so rows show real names, not "Member 3". */
+  memberNamesByUserId?: Record<number, string>;
 }
 
-const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
+const IncomeTable: React.FC<IncomeTableState> = ({
+  incomeTableDetails,
+  memberNamesByUserId,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [selectedIncome, setSelectedIncome] = useState<IncomeDetails | undefined>(undefined);
+  const [pendingDeleteIncome, setPendingDeleteIncome] = useState<IncomeDetails | null>(null);
+  const [isDeletingIncome, setIsDeletingIncome] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
   const [addIncomeMutation] = useAddIncomeMutation();
   const [updateIncomeMutation] = useUpdateIncomeMutation();
+  const [deleteIncomeMutation] = useDeleteIncomeMutation();
   const handleOpenAddModal = () => {
     setModalMode("add");
     setSelectedIncome(undefined);
@@ -64,9 +81,48 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
 
   const getMemberDisplayName = (incomeUserId: number) => {
     if (user?.id === incomeUserId) {
-      return user.name || "You";
+      return user.name || memberNamesByUserId?.[incomeUserId] || "You";
     }
+    const resolved = memberNamesByUserId?.[incomeUserId];
+    if (resolved) return resolved;
     return `Member ${incomeUserId}`;
+  };
+
+  const canDeleteIncome = (income: IncomeDetails) => {
+    if (!user) return false;
+    if (user.role?.toLowerCase() === "admin") return true;
+    return income.userId === user.id;
+  };
+
+  const openDeleteConfirm = (income: IncomeDetails) => {
+    if (!canDeleteIncome(income)) return;
+    setPendingDeleteIncome(income);
+  };
+
+  const handleConfirmDeleteIncome = async () => {
+    const income = pendingDeleteIncome;
+    if (!income) return;
+    setIsDeletingIncome(true);
+    try {
+      await deleteIncomeMutation({
+        id: income.id,
+        familyId: income.familyId,
+        routeType: income.type,
+      }).unwrap();
+      dispatch(
+        incomeApi.util.updateQueryData("getIncomeDetails", income.familyId, (draft) => {
+          if (!draft.incomes) return;
+          draft.incomes = draft.incomes.filter(
+            (x) => !(x.id === income.id && x.type === income.type)
+          );
+        })
+      );
+      setPendingDeleteIncome(null);
+    } catch (err) {
+      console.error("Failed to delete income:", err);
+    } finally {
+      setIsDeletingIncome(false);
+    }
   };
 
   const handleSubmitIncome = async (formData: IncomeFormData) => {
@@ -147,6 +203,17 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
           </div>
         </TableContainer>
         <IncomeModal mode={modalMode} initialData={selectedIncome} isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleSubmitIncome} />
+        <ConfirmModal
+          isOpen={pendingDeleteIncome !== null}
+          title={INCOME_DELETE_CONFIRM_TITLE}
+          message={INCOME_DELETE_CONFIRM_MESSAGE}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          confirmTone="danger"
+          isLoading={isDeletingIncome}
+          onClose={() => setPendingDeleteIncome(null)}
+          onConfirm={handleConfirmDeleteIncome}
+        />
       </>
     );
   }
@@ -167,7 +234,7 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
           </thead>
           <tbody className="text-gray-700">
             {incomeTableDetails.map((income) => (
-              <tr key={income.id} className="border-b hover:bg-gray-50">
+              <tr key={`${income.id}-${income.type}`} className="border-b hover:bg-gray-50">
                 <td className="py-2 px-4">{getMemberDisplayName(income.userId)}</td>
                 <td className="py-2 px-4">{income.source}</td>
                 <td className="py-2 px-4">
@@ -184,7 +251,17 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
                 <td className="py-2 px-4">{formatIndianDate(income.dateReceived)}</td>
                 <td className="py-2 px-4 flex items-center justify-center space-x-3">
                   <Edit onClick={() => handleOpenEditModal(income)} width={18} height={18} className="cursor-pointer text-blue-600 hover:text-blue-800" />
-                  <Trash width={18} height={18} className="cursor-pointer text-red-600 hover:text-red-800" />
+                  <Trash
+                    width={18}
+                    height={18}
+                    onClick={() => openDeleteConfirm(income)}
+                    className={
+                      canDeleteIncome(income)
+                        ? "cursor-pointer text-red-600 hover:text-red-800"
+                        : "cursor-not-allowed text-gray-300"
+                    }
+                    aria-disabled={!canDeleteIncome(income)}
+                  />
                 </td>
               </tr>
             ))}
@@ -193,6 +270,18 @@ const IncomeTable: React.FC<IncomeTableState> = ({ incomeTableDetails }) => {
       </TableContainer>
 
       <IncomeModal mode={modalMode} initialData={selectedIncome} isOpen={isModalOpen} onClose={handleCloseModal} onSubmit={handleSubmitIncome} />
+
+      <ConfirmModal
+        isOpen={pendingDeleteIncome !== null}
+        title={INCOME_DELETE_CONFIRM_TITLE}
+        message={INCOME_DELETE_CONFIRM_MESSAGE}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        confirmTone="danger"
+        isLoading={isDeletingIncome}
+        onClose={() => setPendingDeleteIncome(null)}
+        onConfirm={handleConfirmDeleteIncome}
+      />
     </>
   );
 };

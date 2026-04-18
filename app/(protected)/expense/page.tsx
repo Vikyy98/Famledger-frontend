@@ -1,23 +1,108 @@
-import MainLayout from "@/app/components/layout/MainLayout";
-import { Wallet } from "lucide-react";
+"use client";
 
-export default function ExpensePage() {
+import React, { Suspense, useMemo } from "react";
+import MainLayout from "@/app/components/layout/MainLayout";
+import ExpenseSummary from "@/app/components/expense/ExpenseSummary";
+import ExpenseTrendChart from "@/app/components/expense/ExpenseTrendChart";
+import ExpenseTable from "@/app/components/expense/ExpenseTable";
+import CategoryBreakdownCard from "@/app/components/expense/CategoryBreakdownCard";
+import ExpenseSummarySkeleton from "@/app/components/expense/ExpenseSummarySkeleton";
+import ExpenseTableSkeleton from "@/app/components/expense/ExpenseTableSkeleton";
+import {
+  useGetExpenseDetailsQuery,
+  useGetExpenseCategoriesQuery,
+} from "@/app/services/api/expenseAPI";
+import { useGetFamilyMembersQuery } from "@/app/services/api/familyAPI";
+import { useAppSelector } from "@/app/hooks/useAuth";
+import { AlertTriangle } from "lucide-react";
+
+const ExpensePage: React.FC = () => {
+  const user = useAppSelector((state) => state.auth.user);
+  const familyId = user?.familyId;
+
+  const { data: members = [] } = useGetFamilyMembersQuery(familyId ?? 0, {
+    skip: !familyId,
+  });
+  const memberNamesByUserId = useMemo(() => {
+    const map: Record<number, string> = {};
+    for (const m of members) map[m.id] = m.fullName;
+    return map;
+  }, [members]);
+
+  const { data, isSuccess, error, isError } = useGetExpenseDetailsQuery(
+    familyId ?? 0,
+    { skip: !familyId }
+  );
+
+  const { data: categories = [], isLoading: categoriesLoading } =
+    useGetExpenseCategoriesQuery();
+
+  if (isError) {
+    return (
+      <MainLayout>
+        <div className="h-screen flex justify-center items-center bg-red-100 text-red-700">
+          <AlertTriangle className="h-8 w-8 mr-2" />
+          <p>Fatal Error: Could not load expenses. {JSON.stringify(error)}</p>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  const isDataReady = isSuccess && data;
+
   return (
     <MainLayout>
-      <div className="h-full p-6 bg-gray-50 min-h-screen flex flex-col items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="inline-flex p-4 rounded-full bg-blue-100 mb-4">
-            <Wallet className="w-12 h-12 text-blue-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Expense Management
-          </h2>
-          <p className="text-gray-600">
-            This page will be implemented in Phase 1. Track and manage your
-            family expenses here.
-          </p>
+      <div className="h-full p-6 space-y-8 bg-gray-50 min-h-screen">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Suspense fallback={<ExpenseSummarySkeleton />}>
+            {isDataReady ? (
+              <ExpenseSummary
+                totalExpense={data.totalExpense ?? "₹0"}
+                percentageDifference={data.percentageDifference ?? "0"}
+              />
+            ) : (
+              <ExpenseSummarySkeleton />
+            )}
+          </Suspense>
+
+          {isDataReady ? (
+            <ExpenseTrendChart monthlyTrend={data.monthlyTrend ?? []} />
+          ) : (
+            <div className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse">
+              <div className="h-5 w-32 bg-gray-200 rounded mb-4"></div>
+              <div className="h-[250px] w-full bg-gray-100 rounded"></div>
+            </div>
+          )}
         </div>
+
+        {isDataReady ? (
+          <CategoryBreakdownCard breakdown={data.categoryBreakdown ?? []} />
+        ) : (
+          <div className="rounded-2xl border bg-white p-6 shadow-sm animate-pulse">
+            <div className="h-5 w-40 bg-gray-200 rounded mb-4"></div>
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-3 bg-gray-100 rounded w-full" />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <Suspense fallback={<ExpenseTableSkeleton />}>
+          {isDataReady ? (
+            <ExpenseTable
+              expenses={data.expenses ?? []}
+              memberNamesByUserId={memberNamesByUserId}
+              categories={categories}
+              categoriesLoading={categoriesLoading}
+            />
+          ) : (
+            <ExpenseTableSkeleton />
+          )}
+        </Suspense>
       </div>
     </MainLayout>
   );
-}
+};
+
+export default ExpensePage;

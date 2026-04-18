@@ -29,8 +29,10 @@ const IncomePage: React.FC = () => {
     return map;
   }, [members]);
 
-  const { data, isSuccess, isLoading, error, isError } =
-    useGetIncomeDetailsQuery(user?.familyId ?? 0);
+  const { data, isSuccess, isError } = useGetIncomeDetailsQuery(
+    user?.familyId ?? 0,
+    { skip: !user?.familyId }
+  );
 
   if (isError) {
     return (
@@ -53,14 +55,20 @@ const IncomePage: React.FC = () => {
             {isDataReady ? (
               <IncomeSummary
                 totalIncome={data.totalIncome}
-                totalRecurringIncome={data.totalRecurringIncome}
                 percentageDifference={data.percentageDifference}
               />
             ) : (
               <IncomeSummarySkeleton />
             )}
           </Suspense>
-          <IncomeTrendChart />
+          {isDataReady ? (
+            <IncomeTrendChart monthlyTrend={data.monthlyTrend ?? []} />
+          ) : (
+            <div className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse">
+              <div className="h-5 w-32 bg-gray-200 rounded mb-4"></div>
+              <div className="h-[250px] w-full bg-gray-100 rounded"></div>
+            </div>
+          )}
         </div>
 
         <Suspense fallback={<RecurringIncomeCardSkeleton />}>

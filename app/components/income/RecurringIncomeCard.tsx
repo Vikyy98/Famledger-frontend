@@ -2,7 +2,7 @@ import React from "react";
 import { DollarSign } from "lucide-react";
 
 type RecurringIncomeCardProps = {
-  totalRecurringIncomeAmount: number;
+  totalRecurringIncomeAmount: string;
   recurringIncomeCount: number;
 };
 
@@ -17,10 +17,11 @@ const RecurringIncomeCard: React.FC<RecurringIncomeCardProps> = ({
           Monthly Recurring Income
         </h3>
         <p className="mt-2 text-2xl font-bold text-green-700">
-          {totalRecurringIncomeAmount}
+          {totalRecurringIncomeAmount || "₹0"}
         </p>
         <p className="text-sm text-gray-600">
-          Guaranteed income from {recurringIncomeCount} sources
+          Guaranteed income from {recurringIncomeCount} source
+          {recurringIncomeCount === 1 ? "" : "s"}
         </p>
       </div>
 

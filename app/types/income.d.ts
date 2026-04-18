@@ -12,14 +12,20 @@ export interface IncomeDetails {
   updatedOn?: string;
 }
 
+export interface IncomeMonthlyTrend {
+  month: string;
+  year: number;
+  total: number;
+}
+
 export interface IncomeResponse {
-  userId: number;
   familyId: number;
-  totalIncome: number;
-  totalRecurringIncome: number;
+  totalIncome: string;
+  totalRecurringIncome: string;
   incomes: IncomeDetails[];
   recurringIncomeCount: number;
-  percentageDifference: number;
+  percentageDifference: string;
+  monthlyTrend: IncomeMonthlyTrend[];
 }
 
 export interface AddIncomeRequest {

@@ -5,6 +5,8 @@ import {
   CreateFamilyRequest,
   FamilyInvitationResponse,
   FamilyMember,
+  RemoveMemberArgs,
+  UpdateMemberRoleArgs,
 } from "@/app/types/family";
 
 const familyApi = createApi({
@@ -34,6 +36,25 @@ const familyApi = createApi({
         { type: "FamilyMembers", id: familyId },
       ],
     }),
+    removeFamilyMember: builder.mutation<void, RemoveMemberArgs>({
+      query: ({ familyId, memberUserId }) => ({
+        url: `/families/${familyId}/members/${memberUserId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _err, { familyId }) => [
+        { type: "FamilyMembers", id: familyId },
+      ],
+    }),
+    updateFamilyMemberRole: builder.mutation<FamilyMember, UpdateMemberRoleArgs>({
+      query: ({ familyId, memberUserId, role }) => ({
+        url: `/families/${familyId}/members/${memberUserId}/role`,
+        method: "PATCH",
+        body: { role },
+      }),
+      invalidatesTags: (_result, _err, { familyId }) => [
+        { type: "FamilyMembers", id: familyId },
+      ],
+    }),
   }),
 });
 
@@ -41,5 +62,7 @@ export const {
   useGetFamilyMembersQuery,
   useCreateFamilyMutation,
   useCreateFamilyInvitationMutation,
+  useRemoveFamilyMemberMutation,
+  useUpdateFamilyMemberRoleMutation,
 } = familyApi;
 export default familyApi;

@@ -1,189 +1,414 @@
+"use client";
+
+import React, { useMemo, useState } from "react";
 import {
-  ArrowUp,
-  Plus,
-  Minus,
-  Target,
-  Eye,
-  Wallet,
   PiggyBank,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+  AlertTriangle,
 } from "lucide-react";
 import MainLayout from "@/app/components/layout/MainLayout";
-import StatCard from "@/app/components/shared/StatCard";
+import MonthlyOverviewChart from "@/app/components/dashboard/MonthlyOverviewChart";
+import RecentActivityCard from "@/app/components/dashboard/RecentActivityCard";
+import QuickActions from "@/app/components/dashboard/QuickActions";
+import IncomeModal, {
+  IncomeFormData,
+} from "@/app/components/income/IncomeModal";
+import ExpenseModal, {
+  ExpenseFormData,
+} from "@/app/components/expense/ExpenseModal";
+import {
+  useGetIncomeDetailsQuery,
+  useAddIncomeMutation,
+} from "@/app/services/api/incomeAPI";
+import incomeApi from "@/app/services/api/incomeAPI";
+import {
+  useGetExpenseDetailsQuery,
+  useGetExpenseCategoriesQuery,
+  useAddExpenseMutation,
+} from "@/app/services/api/expenseAPI";
+import expenseApi from "@/app/services/api/expenseAPI";
+import { useGetFamilyMembersQuery } from "@/app/services/api/familyAPI";
+import { useAppDispatch, useAppSelector } from "@/app/hooks/useAuth";
+import {
+  AddIncomeRequest,
+  IncomeDetails,
+  IncomeMonthlyTrend,
+} from "@/app/types/income";
+import {
+  AddExpenseRequest,
+  ExpenseDetails,
+  ExpenseMonthlyTrend,
+} from "@/app/types/expense";
 
-const summaryData = [
-  {
-    title: "Total Income",
-    value: "$12,450",
-    change: "+12.5%",
-    icon: Wallet,
-    isPositive: true,
-  },
-  {
-    title: "Total Expenses",
-    value: "$8,230",
-    change: "+8.2%",
-    icon: ArrowUp,
-    isPositive: false,
-  },
-  {
-    title: "Net Savings",
-    value: "$4,220",
-    change: "+18.7%",
-    icon: PiggyBank,
-    isPositive: true,
-  },
-];
+// Parse "12,450" / "₹12,450.00" into a number. Returns 0 for falsy/NaN.
+const parseCurrencyString = (value: string | undefined): number => {
+  if (!value) return 0;
+  const cleaned = value.replace(/[^0-9.-]/g, "");
+  const parsed = parseFloat(cleaned);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
 
-const activityData = [
-  {
-    title: "Salary Deposit",
-    date: "May 15",
-    amount: "+$5,000",
-    color: "text-green-600",
-  },
-  {
-    title: "Grocery Shopping",
-    date: "May 14",
-    amount: "-$250",
-    color: "text-red-600",
-  },
-  {
-    title: "Rent Payment",
-    date: "May 13",
-    amount: "-$1,400",
-    color: "text-red-600",
-  },
-];
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(amount);
 
-const quickActions = [
-  {
-    name: "Add Income",
-    Icon: Plus,
-    color: "text-green-500",
-    bgColor: "bg-green-100",
-  },
-  {
-    name: "Add Expense",
-    Icon: Minus,
-    color: "text-red-500",
-    bgColor: "bg-red-100",
-  },
-  {
-    name: "Set Goal",
-    Icon: Target,
-    color: "text-indigo-500",
-    bgColor: "bg-indigo-100",
-  },
-  {
-    name: "View Savings",
-    Icon: Eye,
-    color: "text-blue-500",
-    bgColor: "bg-blue-100",
-  },
-];
+// Compute Net Savings percentage change vs last month.
+const computeNetSavingsPercentChange = (
+  incomeTrend: IncomeMonthlyTrend[],
+  expenseTrend: ExpenseMonthlyTrend[]
+): number | null => {
+  if (incomeTrend.length < 2 && expenseTrend.length < 2) return null;
 
-function DashboardPage() {
+  const buildMap = (
+    trend: { month: string; year: number; total: number }[]
+  ) => {
+    const m = new Map<string, number>();
+    for (const p of trend) m.set(`${p.month}-${p.year}`, p.total);
+    return m;
+  };
+
+  // Use the last two entries from income trend as the month anchors (oldest -> newest).
+  const lastTwo = incomeTrend.slice(-2);
+  if (lastTwo.length < 2) return null;
+  const [prev, curr] = lastTwo;
+  const expByKey = buildMap(expenseTrend);
+
+  const prevNet =
+    prev.total - (expByKey.get(`${prev.month}-${prev.year}`) ?? 0);
+  const currNet =
+    curr.total - (expByKey.get(`${curr.month}-${curr.year}`) ?? 0);
+
+  if (prevNet === 0) {
+    if (currNet === 0) return 0;
+    return currNet > 0 ? 100 : -100;
+  }
+  return ((currNet - prevNet) / Math.abs(prevNet)) * 100;
+};
+
+interface StatCardData {
+  title: string;
+  value: string;
+  change: string | null;
+  /** Controls the color of the change pill. */
+  changeTone: "positive" | "negative" | "neutral";
+  icon: React.ReactNode;
+  iconBg: string;
+  iconFg: string;
+}
+
+const StatTile: React.FC<StatCardData> = ({
+  title,
+  value,
+  change,
+  changeTone,
+  icon,
+  iconBg,
+  iconFg,
+}) => {
+  const toneClasses =
+    changeTone === "positive"
+      ? "text-emerald-600"
+      : changeTone === "negative"
+        ? "text-red-600"
+        : "text-gray-500";
+
+  return (
+    <div className="flex items-center justify-between rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md">
+      <div className="space-y-2 min-w-0">
+        <p className="text-sm text-gray-500">{title}</p>
+        <h3 className="text-2xl font-semibold text-gray-800 truncate">
+          {value}
+        </h3>
+        {change && (
+          <div className={`flex items-center text-sm font-medium ${toneClasses}`}>
+            {changeTone === "positive" ? (
+              <TrendingUp className="mr-1 h-4 w-4" />
+            ) : changeTone === "negative" ? (
+              <TrendingDown className="mr-1 h-4 w-4" />
+            ) : null}
+            {change}
+          </div>
+        )}
+      </div>
+      <div className={`rounded-full p-3 ${iconBg} ${iconFg} shrink-0`}>
+        {icon}
+      </div>
+    </div>
+  );
+};
+
+const DashboardPage: React.FC = () => {
+  const user = useAppSelector((state) => state.auth.user);
+  const familyId = user?.familyId;
+  const dispatch = useAppDispatch();
+
+  const {
+    data: incomeData,
+    isSuccess: incomeSuccess,
+    isError: incomeError,
+  } = useGetIncomeDetailsQuery(familyId ?? 0, { skip: !familyId });
+  const {
+    data: expenseData,
+    isSuccess: expenseSuccess,
+    isError: expenseError,
+  } = useGetExpenseDetailsQuery(familyId ?? 0, { skip: !familyId });
+  const { data: categories = [], isLoading: categoriesLoading } =
+    useGetExpenseCategoriesQuery();
+  const { data: members = [] } = useGetFamilyMembersQuery(familyId ?? 0, {
+    skip: !familyId,
+  });
+
+  const memberNamesByUserId = useMemo(() => {
+    const map: Record<number, string> = {};
+    for (const m of members) map[m.id] = m.fullName;
+    return map;
+  }, [members]);
+
+  const [addIncomeMutation] = useAddIncomeMutation();
+  const [addExpenseMutation] = useAddExpenseMutation();
+  const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+
+  const isDataReady = incomeSuccess && expenseSuccess && incomeData && expenseData;
+  const hasFatalError = incomeError || expenseError;
+
+  // Totals & changes
+  const totalIncome = parseCurrencyString(incomeData?.totalIncome);
+  const totalExpense = parseCurrencyString(expenseData?.totalExpense);
+  const netSavings = totalIncome - totalExpense;
+
+  const incomeChangePct = parseFloat(incomeData?.percentageDifference ?? "");
+  const expenseChangePct = parseFloat(expenseData?.percentageDifference ?? "");
+  const savingsChangePct = useMemo(
+    () =>
+      isDataReady
+        ? computeNetSavingsPercentChange(
+            incomeData.monthlyTrend ?? [],
+            expenseData.monthlyTrend ?? []
+          )
+        : null,
+    [isDataReady, incomeData, expenseData]
+  );
+
+  const formatPct = (v: number) =>
+    `${v > 0 ? "+" : ""}${v.toFixed(1)}% from last month`;
+
+  const incomeTileTone: StatCardData["changeTone"] = Number.isNaN(incomeChangePct)
+    ? "neutral"
+    : incomeChangePct >= 0
+      ? "positive"
+      : "negative";
+
+  // For expenses, a decrease is GOOD → show green; an increase is bad → red.
+  const expenseTileTone: StatCardData["changeTone"] = Number.isNaN(expenseChangePct)
+    ? "neutral"
+    : expenseChangePct <= 0
+      ? "positive"
+      : "negative";
+
+  const savingsTileTone: StatCardData["changeTone"] =
+    savingsChangePct === null
+      ? "neutral"
+      : savingsChangePct >= 0
+        ? "positive"
+        : "negative";
+
+  const handleSubmitIncome = async (formData: IncomeFormData) => {
+    try {
+      const payload: AddIncomeRequest = {
+        source: formData.source,
+        amount: parseFloat(formData.amount),
+        userId: user?.id,
+        familyId: user?.familyId,
+        type: formData.incomeType === "RECURRING" ? 1 : 2,
+        frequency:
+          formData.incomeType === "RECURRING"
+            ? formData.recurringFrequency
+            : "ONETIME",
+        dateReceived: formData.date,
+      };
+      const created: IncomeDetails = await addIncomeMutation(payload).unwrap();
+      if (created && created.familyId) {
+        dispatch(
+          incomeApi.util.updateQueryData(
+            "getIncomeDetails",
+            created.familyId,
+            (draft) => {
+              if (!draft.incomes) draft.incomes = [];
+              draft.incomes.unshift(created);
+            }
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to add income:", err);
+      throw err;
+    }
+  };
+
+  const handleSubmitExpense = async (formData: ExpenseFormData) => {
+    try {
+      const payload: AddExpenseRequest = {
+        userId: user?.id,
+        familyId: user?.familyId,
+        description: formData.description,
+        category: parseInt(formData.category, 10),
+        amount: parseFloat(formData.amount),
+        expenseDate: formData.expenseDate,
+      };
+      const created: ExpenseDetails = await addExpenseMutation(payload).unwrap();
+      if (created && created.familyId) {
+        dispatch(
+          expenseApi.util.updateQueryData(
+            "getExpenseDetails",
+            created.familyId,
+            (draft) => {
+              if (!draft.expenses) draft.expenses = [];
+              draft.expenses.unshift(created);
+            }
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to add expense:", err);
+      throw err;
+    }
+  };
+
+  if (hasFatalError) {
+    return (
+      <MainLayout>
+        <div className="h-screen flex justify-center items-center bg-red-100 text-red-700">
+          <AlertTriangle className="h-8 w-8 mr-2" />
+          <p>Could not load your dashboard. Please try again.</p>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {summaryData.map((card) => (
-            <StatCard
-              key={card.title}
-              title={card.title}
-              value={card.value}
-              change={card.change}
-              isPositive={card.isPositive}
-              icon={<card.icon className="h-5 w-5" />}
-            />
-          ))}
+      <div className="h-full p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {isDataReady ? (
+            <>
+              <StatTile
+                title="Total Income"
+                value={formatCurrency(totalIncome)}
+                change={
+                  Number.isNaN(incomeChangePct) ? null : formatPct(incomeChangePct)
+                }
+                changeTone={incomeTileTone}
+                icon={<Wallet className="h-5 w-5" />}
+                iconBg="bg-emerald-50"
+                iconFg="text-emerald-600"
+              />
+              <StatTile
+                title="Total Expenses"
+                value={formatCurrency(totalExpense)}
+                change={
+                  Number.isNaN(expenseChangePct)
+                    ? null
+                    : formatPct(expenseChangePct)
+                }
+                changeTone={expenseTileTone}
+                icon={<TrendingDown className="h-5 w-5" />}
+                iconBg="bg-red-50"
+                iconFg="text-red-600"
+              />
+              <StatTile
+                title="Net Savings"
+                value={formatCurrency(netSavings)}
+                change={
+                  savingsChangePct === null ? null : formatPct(savingsChangePct)
+                }
+                changeTone={savingsTileTone}
+                icon={<PiggyBank className="h-5 w-5" />}
+                iconBg="bg-blue-50"
+                iconFg="text-blue-600"
+              />
+            </>
+          ) : (
+            <>
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse"
+                >
+                  <div className="h-4 w-24 bg-gray-200 rounded mb-3"></div>
+                  <div className="h-7 w-32 bg-gray-200 rounded mb-3"></div>
+                  <div className="h-4 w-28 bg-gray-100 rounded"></div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="p-6 bg-white border rounded-xl shadow-sm lg:col-span-2">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Monthly Overview
-            </h3>
-            <div className="flex items-center mt-2 space-x-4 text-xs font-medium">
-              <span className="flex items-center text-green-500">
-                <span className="inline-block w-2 h-2 mr-1 bg-green-500 rounded-full"></span>{" "}
-                Income
-              </span>
-              <span className="flex items-center text-red-500">
-                <span className="inline-block w-2 h-2 mr-1 bg-red-500 rounded-full"></span>{" "}
-                Expense
-              </span>
-            </div>
-            <div className="h-64 mt-4">
-              <div className="flex items-end h-full">
-                {["Jan", "Feb", "Mar", "Apr", "May"].map((month, index) => (
-                  <div
-                    key={month}
-                    className="flex flex-col items-center justify-end flex-1 h-full px-2"
-                  >
-                    <div
-                      className="w-6 bg-green-500 rounded-t"
-                      style={{ height: `${(index + 3) * 15}px` }}
-                    ></div>
-                    <div
-                      className="w-6 bg-red-500 rounded-t mt-0.5"
-                      style={{ height: `${(index + 2) * 12}px` }}
-                    ></div>
-                    <p className="mt-1 text-xs text-gray-500">{month}</p>
-                  </div>
-                ))}
+          <div className="lg:col-span-2">
+            {isDataReady ? (
+              <MonthlyOverviewChart
+                incomeTrend={incomeData.monthlyTrend ?? []}
+                expenseTrend={expenseData.monthlyTrend ?? []}
+              />
+            ) : (
+              <div className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse">
+                <div className="h-5 w-40 bg-gray-200 rounded mb-4"></div>
+                <div className="h-[280px] w-full bg-gray-100 rounded"></div>
               </div>
-              <div className="mt-2 text-xs text-gray-500">
-                (Chart Data Placeholder)
-              </div>
-            </div>
+            )}
           </div>
 
-          <div className="p-6 bg-white border rounded-xl shadow-sm lg:col-span-1">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Recent Activity
-            </h3>
-            <div className="mt-4 space-y-4">
-              {activityData.map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between pb-2 border-b last:border-b-0"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {activity.title}
-                    </p>
-                    <p className="text-xs text-gray-500">{activity.date}</p>
-                  </div>
-                  <p className={`text-sm font-semibold ${activity.color}`}>
-                    {activity.amount}
-                  </p>
+          <div className="lg:col-span-1">
+            {isDataReady ? (
+              <RecentActivityCard
+                incomes={incomeData.incomes ?? []}
+                expenses={expenseData.expenses ?? []}
+                memberNamesByUserId={memberNamesByUserId}
+                categories={categories}
+                currentUserId={user?.id}
+                currentUserName={user?.name}
+              />
+            ) : (
+              <div className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse">
+                <div className="h-5 w-32 bg-gray-200 rounded mb-4"></div>
+                <div className="space-y-3">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-10 bg-gray-100 rounded"></div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 pt-4 sm:grid-cols-4">
-          {quickActions.map((action) => (
-            <div
-              key={action.name}
-              className="flex flex-col items-center p-4 transition-transform transform bg-white border rounded-xl shadow-sm hover:scale-[1.02] cursor-pointer"
-            >
-              <div
-                className={`p-3 rounded-full ${action.bgColor} ${action.color}`}
-              >
-                <action.Icon className="w-6 h-6" />
-              </div>
-              <p className="mt-3 text-sm font-medium text-gray-700">
-                {action.name}
-              </p>
-            </div>
-          ))}
-        </div>
+        <QuickActions
+          onAddIncome={() => setIsIncomeModalOpen(true)}
+          onAddExpense={() => setIsExpenseModalOpen(true)}
+        />
       </div>
+
+      <IncomeModal
+        mode="add"
+        isOpen={isIncomeModalOpen}
+        onClose={() => setIsIncomeModalOpen(false)}
+        onSubmit={handleSubmitIncome}
+      />
+      <ExpenseModal
+        mode="add"
+        isOpen={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onSubmit={handleSubmitExpense}
+        categories={categories}
+        categoriesLoading={categoriesLoading}
+      />
     </MainLayout>
   );
-}
+};
 
 export default DashboardPage;

@@ -3,12 +3,22 @@
 import MainLayout from "@/app/components/layout/MainLayout";
 import Button from "@/app/components/ui/Button";
 import TableContainer from "@/app/components/shared/TableContainer";
+import ConfirmModal from "@/app/components/shared/ConfirmModal";
 import { useAppSelector } from "@/app/hooks/useAuth";
 import {
   useCreateFamilyInvitationMutation,
   useGetFamilyMembersQuery,
+  useRemoveFamilyMemberMutation,
+  useUpdateFamilyMemberRoleMutation,
 } from "@/app/services/api/familyAPI";
-import { Users, Copy, Check, Pencil, Trash2 } from "lucide-react";
+import { FamilyMember, MemberRole } from "@/app/types/family";
+import {
+  ArrowDown,
+  ArrowUp,
+  Copy,
+  Check,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 function isAdminRole(role: string | undefined) {
@@ -23,11 +33,20 @@ function formatRoleLabel(role: string) {
   return "Member";
 }
 
+type PendingRoleChange = {
+  member: FamilyMember;
+  nextRole: MemberRole;
+};
+
 export default function MembersPage() {
   const user = useAppSelector((s) => s.auth.user);
   const familyId = user?.familyId;
+
   const [createInvitation, { isLoading: inviteLoading }] =
     useCreateFamilyInvitationMutation();
+  const [removeMemberMutation] = useRemoveFamilyMemberMutation();
+  const [updateRoleMutation] = useUpdateFamilyMemberRoleMutation();
+
   const {
     data: members = [],
     isLoading: membersLoading,
@@ -39,7 +58,15 @@ export default function MembersPage() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canInvite = isAdminRole(user?.role) && familyId != null && familyId > 0;
+  const [pendingRemove, setPendingRemove] = useState<FamilyMember | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [pendingRoleChange, setPendingRoleChange] =
+    useState<PendingRoleChange | null>(null);
+  const [isChangingRole, setIsChangingRole] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const isViewerAdmin = isAdminRole(user?.role);
+  const canInvite = isViewerAdmin && familyId != null && familyId > 0;
 
   const { adminCount, memberCount } = useMemo(() => {
     let admins = 0;
@@ -50,6 +77,15 @@ export default function MembersPage() {
     }
     return { adminCount: admins, memberCount: mems };
   }, [members]);
+
+  const isLastAdmin = (member: FamilyMember) =>
+    formatRoleLabel(member.role) === "Admin" && adminCount <= 1;
+
+  const canTargetMember = (member: FamilyMember) => {
+    if (!isViewerAdmin) return false;
+    if (user?.id === member.id) return false; // Admin can't target self via these actions.
+    return true;
+  };
 
   const handleGenerate = async () => {
     if (!familyId) return;
@@ -76,45 +112,87 @@ export default function MembersPage() {
     }
   };
 
+  const openRemoveConfirm = (member: FamilyMember) => {
+    if (!canTargetMember(member) || isLastAdmin(member)) return;
+    setActionError(null);
+    setPendingRemove(member);
+  };
+
+  const handleConfirmRemove = async () => {
+    if (!pendingRemove || !familyId) return;
+    setIsRemoving(true);
+    setActionError(null);
+    try {
+      await removeMemberMutation({
+        familyId,
+        memberUserId: pendingRemove.id,
+      }).unwrap();
+      setPendingRemove(null);
+    } catch (err) {
+      const status = (err as { status?: number })?.status;
+      if (status === 409) {
+        setActionError(
+          "Cannot remove this member — they are the only remaining admin."
+        );
+      } else if (status === 403) {
+        setActionError("You don't have permission to remove this member.");
+      } else {
+        setActionError("Could not remove the member. Please try again.");
+      }
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  const openRoleChangeConfirm = (member: FamilyMember, nextRole: MemberRole) => {
+    if (!canTargetMember(member)) return;
+    if (nextRole === "Member" && isLastAdmin(member)) return;
+    setActionError(null);
+    setPendingRoleChange({ member, nextRole });
+  };
+
+  const handleConfirmRoleChange = async () => {
+    if (!pendingRoleChange || !familyId) return;
+    setIsChangingRole(true);
+    setActionError(null);
+    try {
+      await updateRoleMutation({
+        familyId,
+        memberUserId: pendingRoleChange.member.id,
+        role: pendingRoleChange.nextRole,
+      }).unwrap();
+      setPendingRoleChange(null);
+    } catch (err) {
+      const status = (err as { status?: number })?.status;
+      if (status === 409) {
+        setActionError(
+          "Cannot change this role — at least one admin must remain."
+        );
+      } else if (status === 403) {
+        setActionError("You don't have permission to change this member's role.");
+      } else {
+        setActionError("Could not update the role. Please try again.");
+      }
+    } finally {
+      setIsChangingRole(false);
+    }
+  };
+
   return (
     <MainLayout>
-      <div className="h-full w-full space-y-8">
-        {/* Full-width page header (matches income / dashboard rhythm, not a narrow column) */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex gap-3 min-w-0">
-            <div className="shrink-0 rounded-full bg-blue-100 p-3">
-              <Users className="h-8 w-8 text-blue-600" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-2xl font-semibold text-gray-900">Family members</h1>
-              <p className="mt-1 text-sm text-gray-600">
-                Everyone in your family ledger. Admins can generate invitation codes for new
-                sign-ups.
-              </p>
-              {familyId && !membersLoading && !membersError && (
-                <p className="mt-2 text-sm text-gray-500">
-                  {members.length} total · {adminCount} admin{adminCount !== 1 ? "s" : ""} ·{" "}
-                  {memberCount} member{memberCount !== 1 ? "s" : ""}
-                </p>
-              )}
-            </div>
-          </div>
+      <div className="h-full w-full space-y-6">
+        {familyId && !membersLoading && !membersError && (
+          <p className="text-sm text-gray-500">
+            {members.length} total · {adminCount} admin{adminCount !== 1 ? "s" : ""} ·{" "}
+            {memberCount} member{memberCount !== 1 ? "s" : ""}
+          </p>
+        )}
 
-          {canInvite && (
-            <div className="shrink-0 lg:pt-1">
-              <Button
-                type="button"
-                variant="primary"
-                onClick={handleGenerate}
-                isLoading={inviteLoading}
-                disabled={inviteLoading}
-                className="w-full sm:w-auto"
-              >
-                {inviteLoading ? "Generating…" : "Generate code"}
-              </Button>
-            </div>
-          )}
-        </div>
+        {actionError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {actionError}
+          </div>
+        )}
 
         <TableContainer title="Member details">
           {!familyId ? (
@@ -132,81 +210,150 @@ export default function MembersPage() {
                   <th className="py-3 px-4 font-medium">Member</th>
                   <th className="py-3 px-4 font-medium">Role</th>
                   <th className="py-3 px-4 font-medium">Joined</th>
-                  <th className="py-3 px-4 font-medium text-center">Actions</th>
+                  {isViewerAdmin && (
+                    <th className="py-3 px-4 font-medium text-center">Actions</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-gray-800">
-                {members.map((m) => (
-                  <tr key={m.id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-medium text-gray-900">
-                          {m.fullName}
-                          {user?.id === m.id && (
-                            <span className="ml-2 align-middle rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                              You
-                            </span>
-                          )}
+                {members.map((m) => {
+                  const roleLabel = formatRoleLabel(m.role);
+                  const isSelf = user?.id === m.id;
+                  const targetable = canTargetMember(m);
+                  const lastAdmin = isLastAdmin(m);
+                  return (
+                    <tr key={m.id} className="hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-medium text-gray-900">
+                            {m.fullName}
+                            {isSelf && (
+                              <span className="ml-2 align-middle rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                                You
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-xs text-gray-500">{m.email}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={
+                            roleLabel === "Admin"
+                              ? "inline-block rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-900"
+                              : "inline-block rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
+                          }
+                        >
+                          {roleLabel}
                         </span>
-                        <span className="text-xs text-gray-500">{m.email}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={
-                          formatRoleLabel(m.role) === "Admin"
-                            ? "inline-block rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-900"
-                            : "inline-block rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
-                        }
-                      >
-                        {formatRoleLabel(m.role)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-gray-600">
-                      {m.createdOn
-                        ? new Date(m.createdOn).toLocaleDateString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })
-                        : "—"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center justify-center gap-3">
-                        <button
-                          type="button"
-                          disabled
-                          className="inline-flex rounded p-1 text-gray-300 cursor-not-allowed opacity-60"
-                          aria-label="Edit member (coming soon)"
-                          title="Coming soon"
-                        >
-                          <Pencil className="h-[18px] w-[18px]" strokeWidth={2} />
-                        </button>
-                        <button
-                          type="button"
-                          disabled
-                          className="inline-flex rounded p-1 text-gray-300 cursor-not-allowed opacity-60"
-                          aria-label="Remove member (coming soon)"
-                          title="Coming soon"
-                        >
-                          <Trash2 className="h-[18px] w-[18px]" strokeWidth={2} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-3 px-4 text-gray-600">
+                        {m.createdOn
+                          ? new Date(m.createdOn).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "—"}
+                      </td>
+                      {isViewerAdmin && (
+                        <td className="py-3 px-4">
+                          <div className="flex items-center justify-center gap-2">
+                            {roleLabel === "Member" ? (
+                              <button
+                                type="button"
+                                disabled={!targetable}
+                                onClick={() => openRoleChangeConfirm(m, "Admin")}
+                                className={
+                                  targetable
+                                    ? "inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100"
+                                    : "inline-flex items-center gap-1 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400 cursor-not-allowed"
+                                }
+                                title={
+                                  targetable
+                                    ? "Promote to admin"
+                                    : "You cannot change your own role"
+                                }
+                              >
+                                <ArrowUp className="h-3.5 w-3.5" />
+                                Promote
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled={!targetable || lastAdmin}
+                                onClick={() => openRoleChangeConfirm(m, "Member")}
+                                className={
+                                  targetable && !lastAdmin
+                                    ? "inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 hover:bg-amber-100"
+                                    : "inline-flex items-center gap-1 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400 cursor-not-allowed"
+                                }
+                                title={
+                                  !targetable
+                                    ? "You cannot change your own role"
+                                    : lastAdmin
+                                      ? "Cannot demote the only admin"
+                                      : "Demote to member"
+                                }
+                              >
+                                <ArrowDown className="h-3.5 w-3.5" />
+                                Demote
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              disabled={!targetable || lastAdmin}
+                              onClick={() => openRemoveConfirm(m)}
+                              className={
+                                targetable && !lastAdmin
+                                  ? "inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
+                                  : "inline-flex items-center justify-center rounded-md border border-gray-200 bg-gray-50 p-1.5 text-gray-300 cursor-not-allowed"
+                              }
+                              title={
+                                !targetable
+                                  ? isSelf
+                                    ? "You cannot remove yourself"
+                                    : "Only admins can remove members"
+                                  : lastAdmin
+                                    ? "Cannot remove the only admin"
+                                    : "Remove member"
+                              }
+                              aria-label="Remove member"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
         </TableContainer>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-800">Invitation code</h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Codes are valid for 24 hours. Generating a new code replaces the previous one. Use{" "}
-            <span className="font-medium text-gray-700">Generate code</span> above when you are an
-            admin.
-          </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold text-gray-800">Invitation code</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Codes are valid for 24 hours. Generating a new code replaces the previous one.
+              </p>
+            </div>
+            {canInvite && (
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleGenerate}
+                isLoading={inviteLoading}
+                disabled={inviteLoading}
+                className="w-full sm:w-auto shrink-0"
+              >
+                {inviteLoading ? "Generating…" : "Generate code"}
+              </Button>
+            )}
+          </div>
 
           {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
@@ -240,7 +387,7 @@ export default function MembersPage() {
             </div>
           ) : canInvite ? (
             <p className="mt-4 text-sm text-gray-600">
-              No active code shown yet. Click <strong>Generate code</strong> above to create one.
+              No active code. Click <strong>Generate code</strong> to create one.
             </p>
           ) : (
             <p className="mt-4 text-sm text-gray-600">
@@ -250,6 +397,64 @@ export default function MembersPage() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={pendingRemove !== null}
+        title="Remove member"
+        message={
+          pendingRemove ? (
+            <>
+              Remove <strong>{pendingRemove.fullName}</strong> from{" "}
+              {user?.familyName ? `${user.familyName} Family` : "this family"}? Their income
+              and expense records will stay in the ledger, but they won&apos;t be able to log in
+              or add new entries.
+            </>
+          ) : (
+            ""
+          )
+        }
+        confirmLabel="Remove"
+        cancelLabel="Cancel"
+        confirmTone="danger"
+        isLoading={isRemoving}
+        onClose={() => !isRemoving && setPendingRemove(null)}
+        onConfirm={handleConfirmRemove}
+      />
+
+      <ConfirmModal
+        isOpen={pendingRoleChange !== null}
+        title={
+          pendingRoleChange?.nextRole === "Admin"
+            ? "Promote to admin"
+            : "Demote to member"
+        }
+        message={
+          pendingRoleChange ? (
+            pendingRoleChange.nextRole === "Admin" ? (
+              <>
+                Promote <strong>{pendingRoleChange.member.fullName}</strong> to admin? Admins can
+                invite new members, manage roles, and edit any income or expense in the family.
+              </>
+            ) : (
+              <>
+                Demote <strong>{pendingRoleChange.member.fullName}</strong> to member? They will
+                lose the ability to invite new members and manage roles. Their existing records
+                remain intact.
+              </>
+            )
+          ) : (
+            ""
+          )
+        }
+        confirmLabel={
+          pendingRoleChange?.nextRole === "Admin" ? "Promote" : "Demote"
+        }
+        cancelLabel="Cancel"
+        confirmTone={pendingRoleChange?.nextRole === "Admin" ? "primary" : "danger"}
+        isLoading={isChangingRole}
+        onClose={() => !isChangingRole && setPendingRoleChange(null)}
+        onConfirm={handleConfirmRoleChange}
+      />
     </MainLayout>
   );
 }

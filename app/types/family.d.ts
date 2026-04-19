@@ -22,3 +22,16 @@ export interface FamilyMember {
 export interface CreateFamilyRequest {
   familyName: string;
 }
+
+export type MemberRole = "Admin" | "Member";
+
+export interface RemoveMemberArgs {
+  familyId: number;
+  memberUserId: number;
+}
+
+export interface UpdateMemberRoleArgs {
+  familyId: number;
+  memberUserId: number;
+  role: MemberRole;
+}

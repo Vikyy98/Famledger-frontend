@@ -4,17 +4,14 @@ import NavBar from "./NavBar";
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    // Grid: Sidebar (256px wide) and Main Content (rest of the screen)
+    // Sidebar (256px) + scrollable main column. Each page owns its own padding
+    // (via its top-level wrapper) so section spacing can flex per route.
     <div className="flex h-screen bg-gray-50">
       <SideBar />
 
-      {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto">
         <NavBar />
-        {/* Welcome Text and Main Content */}
-        <div className="p-6">
-          <main>{children}</main>
-        </div>
+        <main>{children}</main>
       </div>
     </div>
   );

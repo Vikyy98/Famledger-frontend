@@ -9,7 +9,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Legend,
 } from "recharts";
 import { IncomeMonthlyTrend } from "@/app/types/income";
 import { ExpenseMonthlyTrend } from "@/app/types/expense";
@@ -81,16 +80,23 @@ const MonthlyOverviewChart: React.FC<MonthlyOverviewChartProps> = ({
   const hasData = data.some((d) => d.income > 0 || d.expense > 0);
 
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Monthly Overview</h3>
-        <div className="flex items-center gap-4 text-xs font-medium">
-          <span className="flex items-center text-emerald-600">
-            <span className="inline-block w-2 h-2 mr-1 bg-emerald-500 rounded-full" />
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            Monthly Overview
+          </p>
+          <h3 className="mt-1 text-base font-semibold text-gray-900">
+            Income vs Expenses
+          </h3>
+        </div>
+        <div className="flex items-center gap-4 text-xs font-medium text-gray-600">
+          <span className="flex items-center">
+            <span className="inline-block w-2 h-2 mr-1.5 bg-emerald-500 rounded-full" />
             Income
           </span>
-          <span className="flex items-center text-red-500">
-            <span className="inline-block w-2 h-2 mr-1 bg-red-500 rounded-full" />
+          <span className="flex items-center">
+            <span className="inline-block w-2 h-2 mr-1.5 bg-rose-500 rounded-full" />
             Expense
           </span>
         </div>
@@ -99,27 +105,47 @@ const MonthlyOverviewChart: React.FC<MonthlyOverviewChartProps> = ({
       {hasData ? (
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={data} barGap={4}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200" />
-            <XAxis dataKey="label" className="text-xs" />
-            <YAxis tickFormatter={formatShortINR} className="text-xs" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#F1F5F9"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="label"
+              tick={{ fontSize: 11, fill: "#64748B" }}
+              axisLine={{ stroke: "#E2E8F0" }}
+              tickLine={false}
+            />
+            <YAxis
+              tickFormatter={formatShortINR}
+              tick={{ fontSize: 11, fill: "#64748B" }}
+              axisLine={false}
+              tickLine={false}
+            />
             <Tooltip
               formatter={(value) => {
                 const n = typeof value === "number" ? value : Number(value);
                 return Number.isFinite(n) ? formatFullINR(n) : "—";
               }}
-              cursor={{ fill: "rgba(0,0,0,0.03)" }}
+              cursor={{ fill: "rgba(15,23,42,0.04)" }}
+              contentStyle={{
+                borderRadius: 12,
+                border: "1px solid #E2E8F0",
+                boxShadow: "0 4px 12px rgba(15,23,42,0.08)",
+                fontSize: 12,
+                fontVariantNumeric: "tabular-nums",
+              }}
             />
-            <Legend wrapperStyle={{ fontSize: "12px" }} iconType="circle" />
             <Bar
               dataKey="income"
               name="Income"
-              fill="#10b981"
+              fill="#059669"
               radius={[4, 4, 0, 0]}
             />
             <Bar
               dataKey="expense"
               name="Expense"
-              fill="#ef4444"
+              fill="#E11D48"
               radius={[4, 4, 0, 0]}
             />
           </BarChart>

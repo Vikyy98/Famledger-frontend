@@ -88,7 +88,7 @@ export default function LoginForm() {
   return (
     <form className="space-y-5" onSubmit={handleLogin}>
       {apiError && (
-        <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
+        <div className="rounded-lg bg-white p-3 text-sm text-rose-700 ring-1 ring-rose-200">
           {apiError}
         </div>
       )}
@@ -110,7 +110,7 @@ export default function LoginForm() {
           <label className="text-sm font-medium text-gray-700">Password</label>
           <Link
             href="/forgot-password"
-            className="text-sm text-blue-600 hover:underline"
+            className="text-sm font-medium text-gray-600 hover:text-gray-900"
           >
             Forgot?
           </Link>
@@ -139,7 +139,7 @@ export default function LoginForm() {
         type="submit"
         disabled={isLoading}
       >
-        {isLoading ? "Logging In..." : "Sign In to Your Account"}
+        {isLoading ? "Logging in…" : "Log in"}
       </Button>
     </form>
   );

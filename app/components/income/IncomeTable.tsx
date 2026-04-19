@@ -222,46 +222,59 @@ const IncomeTable: React.FC<IncomeTableState> = ({
     <>
       <TableContainer title="Income Sources" action={<AddButton label="Add Income" onClick={handleOpenAddModal} />}>
         <table className="min-w-full text-sm table-auto">
-          <thead className="border-b bg-gray-50 text-left text-gray-600">
+          <thead className="border-b border-gray-200 text-left text-[11px] font-medium uppercase tracking-wider text-gray-500">
             <tr>
-              <th className="py-3 px-4 font-medium">Member</th>
-              <th className="py-3 px-4 font-medium">Source</th>
-              <th className="py-3 px-4 font-medium">Income Type</th>
-              <th className="py-3 px-4 font-medium">Amount</th>
-              <th className="py-3 px-4 font-medium">Date Received</th>
-              <th className="py-3 px-4 font-medium text-center">Actions</th>
+              <th className="py-3 px-4">Member</th>
+              <th className="py-3 px-4">Source</th>
+              <th className="py-3 px-4">Income Type</th>
+              <th className="py-3 px-4">Amount</th>
+              <th className="py-3 px-4">Date Received</th>
+              <th className="py-3 px-4 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody className="text-gray-700">
+          <tbody className="divide-y divide-gray-100 text-gray-800">
             {incomeTableDetails.map((income) => (
-              <tr key={`${income.id}-${income.type}`} className="border-b hover:bg-gray-50">
-                <td className="py-2 px-4">{getMemberDisplayName(income.userId)}</td>
-                <td className="py-2 px-4">{income.source}</td>
-                <td className="py-2 px-4">
+              <tr key={`${income.id}-${income.type}`} className="hover:bg-gray-50/60 transition-colors">
+                <td className="py-3 px-4">{getMemberDisplayName(income.userId)}</td>
+                <td className="py-3 px-4">{income.source}</td>
+                <td className="py-3 px-4">
                   <div className="flex flex-col gap-1">
-                    <span className="inline-block rounded-md border bg-blue-100 px-2 py-1 text-[11px] text-blue-800 w-fit">
+                    <span className="inline-flex items-center rounded-md bg-white ring-1 ring-emerald-200 px-2 py-0.5 text-[11px] font-medium text-emerald-700 w-fit">
                       {getIncomeTypeLabel(income.type)}
                     </span>
                     {getFrequencyLabel(income.frequency) && (
-                      <span className="text-[11px] text-gray-500 px-2">{getFrequencyLabel(income.frequency)}</span>
+                      <span className="text-[11px] text-gray-500">
+                        {getFrequencyLabel(income.frequency)}
+                      </span>
                     )}
                   </div>
                 </td>
-                <td className="py-2 px-4">{formatCurrency(income.amount)}</td>
-                <td className="py-2 px-4">{formatIndianDate(income.dateReceived)}</td>
-                <td className="py-2 px-4 flex items-center justify-center space-x-3">
-                  <Edit onClick={() => handleOpenEditModal(income)} width={18} height={18} className="cursor-pointer text-blue-600 hover:text-blue-800" />
-                  <Trash
-                    width={18}
-                    height={18}
-                    onClick={() => openDeleteConfirm(income)}
-                    className={
-                      canDeleteIncome(income)
-                        ? "cursor-pointer text-red-600 hover:text-red-800"
-                        : "cursor-not-allowed text-gray-300"
-                    }
-                    aria-disabled={!canDeleteIncome(income)}
-                  />
+                <td className="py-3 px-4 tabular-nums font-medium text-gray-900">
+                  {formatCurrency(income.amount)}
+                </td>
+                <td className="py-3 px-4 tabular-nums text-gray-600">
+                  {formatIndianDate(income.dateReceived)}
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center justify-center gap-3">
+                    <Edit
+                      onClick={() => handleOpenEditModal(income)}
+                      width={16}
+                      height={16}
+                      className="cursor-pointer text-gray-500 hover:text-gray-900 transition-colors"
+                    />
+                    <Trash
+                      width={16}
+                      height={16}
+                      onClick={() => openDeleteConfirm(income)}
+                      className={
+                        canDeleteIncome(income)
+                          ? "cursor-pointer text-rose-500 hover:text-rose-700 transition-colors"
+                          : "cursor-not-allowed text-gray-300"
+                      }
+                      aria-disabled={!canDeleteIncome(income)}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}

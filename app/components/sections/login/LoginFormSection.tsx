@@ -1,48 +1,45 @@
 import React from "react";
-import { PiggyBank } from "lucide-react";
-import LoginForm from "../../auth/LoginForm";
 import Link from "next/link";
+import LoginForm from "../../auth/LoginForm";
 
 export default function LoginSection() {
   return (
-    <div className="space-y-6 border bg-white p-8 rounded-2xl shadow-sm">
-      {/* Logo / Icon */}
-      <div className="flex justify-center">
-        <div className="bg-blue-100 p-3 rounded-full">
-          <PiggyBank className="text-blue-600 w-6 h-6" />
-        </div>
-      </div>
-
-      {/* Headings */}
-      <div className="text-center space-y-1">
-        <h2 className="text-2xl font-semibold text-gray-900">Welcome Back!</h2>
-        <p className="text-gray-500 text-sm">
-          Continue your journey to financial wellness
+    <div className="space-y-6">
+      <div className="space-y-1.5">
+        <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
+          Log in to FamLedger
+        </h2>
+        <p className="text-sm text-gray-600">
+          Continue tracking your family&rsquo;s finances together.
         </p>
       </div>
 
-      {/* Login Form */}
       <LoginForm />
 
-      {/* Divider */}
-      <div className="border-t my-3" />
-
-      {/* Footer Links */}
-      <div className="flex flex-col space-y-2 text-center text-sm text-gray-600">
-        <span className="border-l-">New to FamLedger? </span>
-
-        <Link
-          href="/register"
-          className="border rounded-lg border-blue-600 bg-white py-2 hover:bg-blue-600 hover:text-white  text-blue-600 font-medium"
+      <div className="relative">
+        <div
+          aria-hidden
+          className="absolute inset-0 flex items-center"
         >
-          Create Free Account
-        </Link>
+          <span className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-white px-2 text-gray-500">
+            New to FamLedger?
+          </span>
+        </div>
       </div>
 
-      {/* Bottom Info (optional small tagline) */}
-      <div className="text-center text-xs text-gray-400 mt-3">
-        Secure • Free Forever • Family Friendly
-      </div>
+      <Link
+        href="/register"
+        className="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50"
+      >
+        Create a free account
+      </Link>
+
+      <p className="text-center text-xs text-gray-500">
+        No credit card required
+      </p>
     </div>
   );
 }

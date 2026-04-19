@@ -62,8 +62,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             <span
               className={
                 isDangerTone
-                  ? "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600"
-                  : "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600"
+                  ? "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 ring-1 ring-rose-100"
+                  : "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100"
               }
               aria-hidden
             >

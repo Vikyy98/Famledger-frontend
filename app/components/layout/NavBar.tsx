@@ -18,9 +18,9 @@ const getTimeGreeting = (): string => {
 const roleBadgeClass = (role?: string) => {
   const r = role?.toLowerCase() ?? "";
   if (r === "admin" || r === "administrator") {
-    return "bg-amber-50 text-amber-800 border-amber-200";
+    return "bg-white ring-amber-200 text-amber-700";
   }
-  return "bg-slate-100 text-slate-700 border-slate-200";
+  return "bg-white ring-gray-200 text-gray-600";
 };
 
 const roleLabel = (role?: string) => {
@@ -86,7 +86,7 @@ function NavBar() {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-4 px-6 py-4 bg-white border-b shadow-sm">
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-4 px-6 py-4 bg-white border-b border-gray-200">
       <div className="min-w-0">
         <h1 className="text-xl font-semibold text-gray-900 truncate">
           {pageTitle}
@@ -104,7 +104,7 @@ function NavBar() {
           aria-haspopup="menu"
           aria-expanded={isMenuOpen}
         >
-          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">
+          <div className="w-8 h-8 bg-indigo-50 ring-1 ring-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm">
             {initial}
           </div>
           <div className="hidden sm:flex flex-col items-start leading-tight">
@@ -130,7 +130,7 @@ function NavBar() {
             className="absolute right-6 top-full mt-2 w-72 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-30"
           >
             <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">
+              <div className="w-10 h-10 bg-indigo-50 ring-1 ring-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold">
                 {initial}
               </div>
               <div className="min-w-0 flex-1">
@@ -142,7 +142,7 @@ function NavBar() {
                   <span className="truncate">{user?.email ?? "—"}</span>
                 </p>
                 <span
-                  className={`mt-1 inline-block rounded-md border px-2 py-0.5 text-[11px] font-medium ${roleBadgeClass(
+                  className={`mt-1 inline-flex items-center rounded-md ring-1 px-2 py-0.5 text-[11px] font-medium ${roleBadgeClass(
                     user?.role
                   )}`}
                 >
@@ -191,7 +191,7 @@ function NavBar() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                className="flex w-full items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors"
                 role="menuitem"
               >
                 <LogOut className="h-4 w-4" />

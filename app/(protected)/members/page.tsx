@@ -180,16 +180,16 @@ export default function MembersPage() {
 
   return (
     <MainLayout>
-      <div className="h-full w-full space-y-6">
+      <div className="p-6 space-y-6">
         {familyId && !membersLoading && !membersError && (
-          <p className="text-sm text-gray-500">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500 tabular-nums">
             {members.length} total · {adminCount} admin{adminCount !== 1 ? "s" : ""} ·{" "}
             {memberCount} member{memberCount !== 1 ? "s" : ""}
           </p>
         )}
 
         {actionError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
             {actionError}
           </div>
         )}
@@ -205,13 +205,13 @@ export default function MembersPage() {
             <p className="py-8 text-sm text-gray-600">No members found.</p>
           ) : (
             <table className="min-w-full text-sm table-auto">
-              <thead className="border-b bg-gray-50 text-left text-gray-600">
+              <thead className="border-b border-gray-200 text-left text-[11px] font-medium uppercase tracking-wider text-gray-500">
                 <tr>
-                  <th className="py-3 px-4 font-medium">Member</th>
-                  <th className="py-3 px-4 font-medium">Role</th>
-                  <th className="py-3 px-4 font-medium">Joined</th>
+                  <th className="py-3 px-4">Member</th>
+                  <th className="py-3 px-4">Role</th>
+                  <th className="py-3 px-4">Joined</th>
                   {isViewerAdmin && (
-                    <th className="py-3 px-4 font-medium text-center">Actions</th>
+                    <th className="py-3 px-4 text-center">Actions</th>
                   )}
                 </tr>
               </thead>
@@ -222,13 +222,13 @@ export default function MembersPage() {
                   const targetable = canTargetMember(m);
                   const lastAdmin = isLastAdmin(m);
                   return (
-                    <tr key={m.id} className="hover:bg-gray-50">
+                    <tr key={m.id} className="hover:bg-gray-50/60 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex flex-col gap-0.5">
                           <span className="font-medium text-gray-900">
                             {m.fullName}
                             {isSelf && (
-                              <span className="ml-2 align-middle rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                              <span className="ml-2 align-middle inline-flex items-center rounded-md bg-white ring-1 ring-indigo-200 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
                                 You
                               </span>
                             )}
@@ -240,14 +240,14 @@ export default function MembersPage() {
                         <span
                           className={
                             roleLabel === "Admin"
-                              ? "inline-block rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-900"
-                              : "inline-block rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
+                              ? "inline-flex items-center rounded-md bg-white ring-1 ring-amber-200 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                              : "inline-flex items-center rounded-md bg-white ring-1 ring-gray-200 px-2 py-0.5 text-[11px] font-medium text-gray-600"
                           }
                         >
                           {roleLabel}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-gray-600">
+                      <td className="py-3 px-4 text-gray-600 tabular-nums">
                         {m.createdOn
                           ? new Date(m.createdOn).toLocaleDateString("en-IN", {
                               day: "numeric",
@@ -266,8 +266,8 @@ export default function MembersPage() {
                                 onClick={() => openRoleChangeConfirm(m, "Admin")}
                                 className={
                                   targetable
-                                    ? "inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100"
-                                    : "inline-flex items-center gap-1 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400 cursor-not-allowed"
+                                    ? "inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-emerald-200 px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 transition-colors"
+                                    : "inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-gray-200 px-2 py-1 text-xs font-medium text-gray-400 cursor-not-allowed"
                                 }
                                 title={
                                   targetable
@@ -285,8 +285,8 @@ export default function MembersPage() {
                                 onClick={() => openRoleChangeConfirm(m, "Member")}
                                 className={
                                   targetable && !lastAdmin
-                                    ? "inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 hover:bg-amber-100"
-                                    : "inline-flex items-center gap-1 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-medium text-gray-400 cursor-not-allowed"
+                                    ? "inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-amber-200 px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-50 transition-colors"
+                                    : "inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-gray-200 px-2 py-1 text-xs font-medium text-gray-400 cursor-not-allowed"
                                 }
                                 title={
                                   !targetable
@@ -306,8 +306,8 @@ export default function MembersPage() {
                               onClick={() => openRemoveConfirm(m)}
                               className={
                                 targetable && !lastAdmin
-                                  ? "inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
-                                  : "inline-flex items-center justify-center rounded-md border border-gray-200 bg-gray-50 p-1.5 text-gray-300 cursor-not-allowed"
+                                  ? "inline-flex items-center justify-center rounded-md bg-white ring-1 ring-rose-200 p-1.5 text-rose-600 hover:bg-rose-50 transition-colors"
+                                  : "inline-flex items-center justify-center rounded-md bg-white ring-1 ring-gray-200 p-1.5 text-gray-300 cursor-not-allowed"
                               }
                               title={
                                 !targetable
@@ -333,11 +333,13 @@ export default function MembersPage() {
           )}
         </TableContainer>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-gray-800">Invitation code</h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                Invitation Code
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
                 Codes are valid for 24 hours. Generating a new code replaces the previous one.
               </p>
             </div>
@@ -355,32 +357,32 @@ export default function MembersPage() {
             )}
           </div>
 
-          {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+          {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
 
           {plainCode ? (
-            <div className="mt-4 space-y-2 rounded-lg border border-gray-100 bg-gray-50 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div className="mt-4 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-gray-500">
                 Copy and send this code
               </p>
               <div className="flex items-center justify-between gap-2">
-                <code className="break-all text-lg font-mono font-semibold text-gray-900">
+                <code className="break-all text-lg font-mono font-semibold tracking-wide text-gray-900">
                   {plainCode}
                 </code>
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="shrink-0 rounded-lg border border-gray-200 bg-white p-2 text-gray-600 hover:bg-gray-100"
+                  className="shrink-0 rounded-lg border border-gray-200 bg-white p-2 text-gray-600 hover:bg-gray-100 transition-colors"
                   aria-label="Copy code"
                 >
                   {copied ? (
-                    <Check className="h-5 w-5 text-green-600" />
+                    <Check className="h-5 w-5 text-emerald-600" />
                   ) : (
                     <Copy className="h-5 w-5" />
                   )}
                 </button>
               </div>
               {expiresAt && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 tabular-nums">
                   Expires: {new Date(expiresAt).toLocaleString()}
                 </p>
               )}

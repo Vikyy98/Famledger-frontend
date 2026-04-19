@@ -1,69 +1,68 @@
-import React from "react";
-import { FeatureCard } from "../../ui/FeatureCard";
-import { IconWrapper } from "../../ui/IconWrapper";
-import { Rocket, Heart, PiggyBank, Target } from "lucide-react";
+import { Rocket, Users, PieChart, ShieldCheck } from "lucide-react";
+
+const points = [
+  {
+    Icon: Rocket,
+    accent: "bg-emerald-50 text-emerald-600 ring-emerald-100",
+    title: "Set up in under a minute",
+    description: "Create your family workspace and invite members in one flow.",
+  },
+  {
+    Icon: Users,
+    accent: "bg-indigo-50 text-indigo-600 ring-indigo-100",
+    title: "Everyone on the same page",
+    description: "Shared income, expenses, and visibility for all members.",
+  },
+  {
+    Icon: PieChart,
+    accent: "bg-amber-50 text-amber-600 ring-amber-100",
+    title: "Insight without the spreadsheets",
+    description: "Automatic monthly trends and category breakdowns.",
+  },
+  {
+    Icon: ShieldCheck,
+    accent: "bg-rose-50 text-rose-600 ring-rose-100",
+    title: "Your data stays yours",
+    description: "No ads, no tracking pixels, no hidden upsells.",
+  },
+];
 
 function RegisterHeroSection() {
   return (
-    <div className="max-w-lg space-y-8">
-      {/* Tagline */}
-      <div className="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
-        🌟 Start Free • No Credit Card
-      </div>
+    <div className="space-y-8">
+      <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+        Start free &middot; No credit card
+      </span>
 
-      {/* Heading */}
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 leading-tight">
-          {"Begin Your Family's"}
+        <h1 className="text-4xl font-semibold tracking-tight text-gray-900 lg:text-[44px] lg:leading-[1.1]">
+          Bring your family onto one shared plan.
         </h1>
-        <h1 className="text-4xl font-bold leading-tight text-blue-600">
-          Financial Journey
-        </h1>
-        <p className="text-gray-600 mt-3">
-          Join thousands of families building wealth, achieving goals, and
-          securing their future together.
+        <p className="mt-4 text-base leading-relaxed text-gray-600">
+          Create an account, invite your household, and see where money is
+          flowing &mdash; all in a single shared view.
         </p>
       </div>
 
-      {/* Feature Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <FeatureCard
-          icon={
-            <IconWrapper>
-              <Rocket size={18} />
-            </IconWrapper>
-          }
-          title="Quick Setup"
-          description="Get started in under 2 minutes"
-        />
-        <FeatureCard
-          icon={
-            <IconWrapper>
-              <Heart size={18} />
-            </IconWrapper>
-          }
-          title="Family First"
-          description="Built for families, by families"
-        />
-        <FeatureCard
-          icon={
-            <IconWrapper>
-              <PiggyBank size={18} />
-            </IconWrapper>
-          }
-          title="Smart Savings"
-          description="Save 30% more on average"
-        />
-        <FeatureCard
-          icon={
-            <IconWrapper>
-              <Target size={18} />
-            </IconWrapper>
-          }
-          title="Goal Tracking"
-          description="Achieve dreams together"
-        />
-      </div>
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {points.map(({ Icon, accent, title, description }) => (
+          <li
+            key={title}
+            className="rounded-xl border border-gray-200 bg-white/70 p-4 backdrop-blur"
+          >
+            <span
+              className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ring-1 ${accent}`}
+            >
+              <Icon className="h-4 w-4" />
+            </span>
+            <p className="mt-3 text-sm font-semibold text-gray-900">{title}</p>
+            <p className="mt-1 text-xs leading-relaxed text-gray-600">
+              {description}
+            </p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

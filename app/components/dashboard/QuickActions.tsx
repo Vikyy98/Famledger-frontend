@@ -16,17 +16,13 @@ const QuickActions: React.FC<QuickActionsProps> = ({
     {
       name: "Add Income",
       Icon: Plus,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-      hoverRing: "hover:ring-emerald-200",
+      accent: "text-emerald-600",
       onClick: onAddIncome,
     },
     {
       name: "Add Expense",
       Icon: Minus,
-      color: "text-red-600",
-      bgColor: "bg-red-50",
-      hoverRing: "hover:ring-red-200",
+      accent: "text-rose-600",
       onClick: onAddExpense,
     },
   ];
@@ -38,14 +34,14 @@ const QuickActions: React.FC<QuickActionsProps> = ({
           key={action.name}
           type="button"
           onClick={action.onClick}
-          className={`flex flex-col items-center justify-center gap-2 rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md ring-1 ring-transparent ${action.hoverRing}`}
+          className="flex items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition-colors duration-200 hover:border-gray-300 hover:bg-gray-50"
         >
           <div
-            className={`rounded-full p-3 ${action.bgColor} ${action.color}`}
+            className={`rounded-full bg-gray-50 ring-1 ring-gray-100 p-2 ${action.accent}`}
           >
-            <action.Icon className="h-5 w-5" />
+            <action.Icon className="h-4 w-4" />
           </div>
-          <p className="text-sm font-medium text-gray-700">{action.name}</p>
+          <p className="text-sm font-medium text-gray-800">{action.name}</p>
         </button>
       ))}
     </div>

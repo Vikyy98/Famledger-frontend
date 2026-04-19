@@ -49,7 +49,7 @@ const IncomePage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="h-full p-6 space-y-8 bg-gray-50 min-h-screen">
+      <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Suspense fallback={<IncomeSummarySkeleton />}>
             {isDataReady ? (
@@ -64,7 +64,7 @@ const IncomePage: React.FC = () => {
           {isDataReady ? (
             <IncomeTrendChart monthlyTrend={data.monthlyTrend ?? []} />
           ) : (
-            <div className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 animate-pulse">
               <div className="h-5 w-32 bg-gray-200 rounded mb-4"></div>
               <div className="h-[250px] w-full bg-gray-100 rounded"></div>
             </div>

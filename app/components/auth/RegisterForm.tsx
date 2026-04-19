@@ -99,7 +99,7 @@ function RegisterForm() {
   return (
     <form onSubmit={handleOnSubmit} className="space-y-5">
       {apiError && (
-        <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
+        <div className="rounded-lg bg-white p-3 text-sm text-rose-700 ring-1 ring-rose-200">
           {apiError}
         </div>
       )}
@@ -113,8 +113,8 @@ function RegisterForm() {
           }}
           className={`flex flex-col items-start rounded-xl border p-3 text-left transition ${
             registrationMode === "createFamily"
-              ? "border-blue-500 bg-blue-50 text-blue-800"
-              : "border-gray-200 hover:bg-gray-50"
+              ? "border-indigo-500 bg-indigo-50/60 text-indigo-800 ring-1 ring-indigo-200"
+              : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
           }`}
         >
           <span className="flex items-center gap-2 font-semibold text-sm">
@@ -131,8 +131,8 @@ function RegisterForm() {
           }}
           className={`flex flex-col items-start rounded-xl border p-3 text-left transition ${
             registrationMode === "joinFamily"
-              ? "border-blue-500 bg-blue-50 text-blue-800"
-              : "border-gray-200 hover:bg-gray-50"
+              ? "border-indigo-500 bg-indigo-50/60 text-indigo-800 ring-1 ring-indigo-200"
+              : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
           }`}
         >
           <span className="flex items-center gap-2 font-semibold text-sm">
@@ -233,11 +233,11 @@ function RegisterForm() {
 
       <p className="text-xs text-gray-500 text-center">
         By signing up, you agree to our{" "}
-        <a href="#" className="text-blue-600 underline hover:text-blue-700">
+        <a href="#" className="font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 hover:text-gray-900 hover:decoration-gray-500">
           Terms of Service
         </a>{" "}
         and{" "}
-        <a href="#" className="text-blue-600 underline hover:text-blue-700">
+        <a href="#" className="font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 hover:text-gray-900 hover:decoration-gray-500">
           Privacy Policy
         </a>
         .

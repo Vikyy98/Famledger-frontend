@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
-import { ArrowDownRight, ArrowUpRight, Clock } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { IncomeDetails } from "@/app/types/income";
 import { ExpenseDetails, ExpenseCategoryOption } from "@/app/types/expense";
 
@@ -96,12 +96,11 @@ const RecentActivityCard: React.FC<RecentActivityCardProps> = ({
   }, [incomes, expenses, memberNamesByUserId, categoryNameByValue, currentUserId, currentUserName, limit]);
 
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-800">Recent Activity</h3>
-        </div>
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+          Recent Activity
+        </p>
       </div>
 
       {items.length === 0 ? (
@@ -119,17 +118,13 @@ const RecentActivityCard: React.FC<RecentActivityCardProps> = ({
                   className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
                 >
                   <div
-                    className={`rounded-full p-2 shrink-0 ${
-                      isIncome
-                        ? "bg-emerald-50 text-emerald-600"
-                        : "bg-red-50 text-red-600"
-                    }`}
+                    className="rounded-full p-2 shrink-0 bg-gray-50 text-gray-600 ring-1 ring-gray-100"
                     aria-hidden
                   >
                     {isIncome ? (
-                      <ArrowDownRight className="h-4 w-4" />
+                      <ArrowDownRight className="h-4 w-4 text-emerald-500" />
                     ) : (
-                      <ArrowUpRight className="h-4 w-4" />
+                      <ArrowUpRight className="h-4 w-4 text-rose-500" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -141,8 +136,8 @@ const RecentActivityCard: React.FC<RecentActivityCardProps> = ({
                     </p>
                   </div>
                   <p
-                    className={`text-sm font-semibold whitespace-nowrap ${
-                      isIncome ? "text-emerald-600" : "text-red-600"
+                    className={`text-sm font-semibold tabular-nums whitespace-nowrap ${
+                      isIncome ? "text-emerald-600" : "text-rose-600"
                     }`}
                   >
                     {isIncome ? "+" : "−"}
@@ -155,11 +150,14 @@ const RecentActivityCard: React.FC<RecentActivityCardProps> = ({
           <div className="mt-4 flex items-center justify-end gap-4 text-xs font-medium">
             <Link
               href="/income"
-              className="text-emerald-600 hover:text-emerald-700"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
             >
               View income →
             </Link>
-            <Link href="/expense" className="text-red-600 hover:text-red-700">
+            <Link
+              href="/expense"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
               View expenses →
             </Link>
           </div>

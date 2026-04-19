@@ -1,77 +1,69 @@
-const FeaturesSection = () => {
+import { Users, PieChart, ShieldCheck } from "lucide-react";
+
+const features = [
+  {
+    Icon: Users,
+    accent: "bg-emerald-50 text-emerald-600 ring-emerald-100",
+    title: "One shared view",
+    description:
+      "Invite your partner, parents, or roommates. Everyone sees the same income and spending picture — no more \"did you pay the rent?\"",
+  },
+  {
+    Icon: PieChart,
+    accent: "bg-indigo-50 text-indigo-600 ring-indigo-100",
+    title: "Spending clarity, not spreadsheets",
+    description:
+      "Category breakdowns, monthly trends, and recurring income surfaced automatically. Skip the Excel ritual.",
+  },
+  {
+    Icon: ShieldCheck,
+    accent: "bg-amber-50 text-amber-600 ring-amber-100",
+    title: "Private by default",
+    description:
+      "Your family's financial data stays yours. No tracking pixels, no selling data to advertisers, no hidden upsells.",
+  },
+];
+
+const FeatureSection = () => {
   return (
-    <section className="w-full bg-gray-50 py-20">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Section Heading */}
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Everything your family needs to stay financially organized
+    <section className="w-full bg-white py-20 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="max-w-2xl">
+          <p className="text-xs font-medium uppercase tracking-wider text-emerald-700">
+            What you get
+          </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+            Everything your household needs &mdash; nothing it doesn&rsquo;t.
           </h2>
-          <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
-            From tracking expenses to managing goals, FamLedger keeps everyone
-            aligned and informed, every step of the way.
+          <p className="mt-4 text-base leading-relaxed text-gray-600">
+            FamLedger focuses on the three things that actually move the needle
+            for family finances: visibility, collaboration, and trust.
           </p>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-          {/* Feature 1 */}
-          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-5">
-              <span className="text-blue-600 text-2xl">📊</span>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map(({ Icon, accent, title, description }) => (
+            <div
+              key={title}
+              className="rounded-2xl border border-gray-200 bg-white p-6 transition-colors hover:border-gray-300"
+            >
+              <span
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ring-1 ${accent}`}
+              >
+                <Icon className="h-5 w-5" />
+              </span>
+              <h3 className="mt-5 text-lg font-semibold tracking-tight text-gray-900">
+                {title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                {description}
+              </p>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Track Spending
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Monitor expenses effortlessly and get clarity on where your money
-              goes each month.
-            </p>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
-            <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center mb-5">
-              <span className="text-green-600 text-2xl">🎯</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">Set Goals</h3>
-            <p className="text-gray-600 mt-2">
-              Create saving targets and track progress as a family to stay
-              motivated and accountable.
-            </p>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
-            <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-5">
-              <span className="text-purple-600 text-2xl">👨‍👩‍👧‍👦</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Collaborate Together
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Add family members, share budgets, and manage expenses
-              transparently and in real-time.
-            </p>
-          </div>
-
-          {/* Feature 4 */}
-          <div className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition">
-            <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center mb-5">
-              <span className="text-yellow-600 text-2xl">💼</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Manage Accounts
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Keep track of multiple bank accounts, wallets, and cash flow
-              without any hassle.
-            </p>
-          </div>
+          ))}
         </div>
       </div>
     </section>
   );
 };
 
-export default FeaturesSection;
+export default FeatureSection;

@@ -4,7 +4,6 @@ import {
   ExpenseCategoryOption,
   ExpenseDetails,
 } from "@/app/types/expense";
-import { PieChart } from "lucide-react";
 
 type RangeKey = "this" | "last" | "3m" | "all";
 
@@ -18,19 +17,20 @@ interface CategoryBreakdownCardProps {
 }
 
 // Tailwind classes for the stacked bar segments and legend dots.
-// Keep the two maps in sync so the dot color matches the segment color.
+// Kept slightly desaturated (400s) so the whole stack reads as one unit rather than
+// eight competing primaries. The dot in the legend uses the same class.
 const CATEGORY_SEGMENT_COLORS: Record<string, string> = {
-  Food: "bg-orange-500",
+  Food: "bg-orange-400",
   Housing: "bg-indigo-500",
-  Transport: "bg-sky-500",
-  Utilities: "bg-amber-500",
-  Entertainment: "bg-pink-500",
-  Medical: "bg-red-500",
-  Education: "bg-emerald-500",
-  Other: "bg-gray-500",
+  Transport: "bg-sky-400",
+  Utilities: "bg-amber-400",
+  Entertainment: "bg-pink-400",
+  Medical: "bg-rose-500",
+  Education: "bg-emerald-400",
+  Other: "bg-gray-400",
 };
 
-const DEFAULT_SEGMENT_COLOR = "bg-gray-400";
+const DEFAULT_SEGMENT_COLOR = "bg-gray-300";
 
 const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
   { key: "this", label: "This Month" },
@@ -132,14 +132,13 @@ const CategoryBreakdownCard: React.FC<CategoryBreakdownCardProps> = ({
   }[range];
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6">
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <PieChart className="h-5 w-5 text-gray-600" />
-        <h3 className="text-lg font-semibold text-gray-800">
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
           Category Breakdown
-        </h3>
+        </p>
         {total > 0 && (
-          <span className="ml-auto text-sm font-medium text-gray-700">
+          <span className="ml-auto text-sm font-semibold tabular-nums text-gray-900">
             {formatCurrency(total)}
           </span>
         )}
@@ -161,7 +160,7 @@ const CategoryBreakdownCard: React.FC<CategoryBreakdownCardProps> = ({
               onClick={() => setRange(opt.key)}
               className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                 isActive
-                  ? "bg-white text-gray-900 shadow-sm"
+                  ? "bg-white text-gray-900 ring-1 ring-gray-200"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -211,7 +210,7 @@ const CategoryBreakdownCard: React.FC<CategoryBreakdownCardProps> = ({
                   <span className="truncate text-gray-700">
                     {item.categoryName}
                   </span>
-                  <span className="ml-auto text-gray-500 text-xs whitespace-nowrap">
+                  <span className="ml-auto text-gray-600 text-xs tabular-nums whitespace-nowrap">
                     {formatCurrency(item.amount)}{" "}
                     <span className="text-gray-400">
                       ({item.percentage.toFixed(1)}%)

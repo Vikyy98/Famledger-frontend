@@ -1,17 +1,14 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import {
-  PiggyBank,
-  TrendingDown,
-  TrendingUp,
-  Wallet,
-  AlertTriangle,
-} from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import MainLayout from "@/app/components/layout/MainLayout";
 import MonthlyOverviewChart from "@/app/components/dashboard/MonthlyOverviewChart";
 import RecentActivityCard from "@/app/components/dashboard/RecentActivityCard";
 import QuickActions from "@/app/components/dashboard/QuickActions";
+import Sparkline, {
+  SparklineTone,
+} from "@/app/components/dashboard/Sparkline";
 import IncomeModal, {
   IncomeFormData,
 } from "@/app/components/income/IncomeModal";
@@ -94,11 +91,12 @@ interface StatCardData {
   title: string;
   value: string;
   change: string | null;
-  /** Controls the color of the change pill. */
+  /** Controls the color of the change indicator and sparkline accent. */
   changeTone: "positive" | "negative" | "neutral";
-  icon: React.ReactNode;
-  iconBg: string;
-  iconFg: string;
+  /** Controls the color of the headline number. income=emerald, expense=rose, neutral=ink. */
+  valueTone: "income" | "expense" | "neutral";
+  sparklineData: number[];
+  sparklineTone: SparklineTone;
 }
 
 const StatTile: React.FC<StatCardData> = ({
@@ -106,37 +104,58 @@ const StatTile: React.FC<StatCardData> = ({
   value,
   change,
   changeTone,
-  icon,
-  iconBg,
-  iconFg,
+  valueTone,
+  sparklineData,
+  sparklineTone,
 }) => {
-  const toneClasses =
+  const toneText =
     changeTone === "positive"
       ? "text-emerald-600"
       : changeTone === "negative"
-        ? "text-red-600"
+        ? "text-rose-600"
         : "text-gray-500";
 
+  const toneDot =
+    changeTone === "positive"
+      ? "bg-emerald-500"
+      : changeTone === "negative"
+        ? "bg-rose-500"
+        : "bg-gray-400";
+
+  const valueToneClass =
+    valueTone === "income"
+      ? "text-emerald-600"
+      : valueTone === "expense"
+        ? "text-rose-600"
+        : "text-gray-900";
+
   return (
-    <div className="flex items-center justify-between rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md">
-      <div className="space-y-2 min-w-0">
-        <p className="text-sm text-gray-500">{title}</p>
-        <h3 className="text-2xl font-semibold text-gray-800 truncate">
-          {value}
-        </h3>
-        {change && (
-          <div className={`flex items-center text-sm font-medium ${toneClasses}`}>
-            {changeTone === "positive" ? (
-              <TrendingUp className="mr-1 h-4 w-4" />
-            ) : changeTone === "negative" ? (
-              <TrendingDown className="mr-1 h-4 w-4" />
-            ) : null}
-            {change}
-          </div>
-        )}
-      </div>
-      <div className={`rounded-full p-3 ${iconBg} ${iconFg} shrink-0`}>
-        {icon}
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 transition-colors duration-200 hover:border-gray-300">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            {title}
+          </p>
+          <h3 className={`mt-2 text-3xl font-semibold tracking-tight tabular-nums truncate ${valueToneClass}`}>
+            {value}
+          </h3>
+          {change ? (
+            <div
+              className={`mt-2 flex items-center gap-1.5 text-xs font-medium ${toneText}`}
+            >
+              <span
+                className={`inline-block h-1.5 w-1.5 rounded-full ${toneDot}`}
+                aria-hidden
+              />
+              <span className="tabular-nums">{change}</span>
+            </div>
+          ) : (
+            <div className="mt-2 h-4" aria-hidden />
+          )}
+        </div>
+        <div className="w-24 shrink-0 sm:w-28">
+          <Sparkline data={sparklineData} tone={sparklineTone} height={44} />
+        </div>
       </div>
     </div>
   );
@@ -194,6 +213,44 @@ const DashboardPage: React.FC = () => {
         : null,
     [isDataReady, incomeData, expenseData]
   );
+
+  // Aligned monthly series for the three stat-tile sparklines.
+  // All three share the same month axis (union of income+expense months, chronological).
+  const sparkSeries = useMemo(() => {
+    if (!isDataReady) {
+      return { income: [] as number[], expense: [] as number[], savings: [] as number[] };
+    }
+    const incomeTrend = incomeData.monthlyTrend ?? [];
+    const expenseTrend = expenseData.monthlyTrend ?? [];
+    const keyOf = (m: string, y: number) => `${y}-${m}`;
+
+    const order: string[] = [];
+    const incomeBy = new Map<string, number>();
+    const expenseBy = new Map<string, number>();
+    const seen = new Set<string>();
+
+    for (const p of incomeTrend) {
+      const k = keyOf(p.month, p.year);
+      incomeBy.set(k, p.total);
+      if (!seen.has(k)) {
+        seen.add(k);
+        order.push(k);
+      }
+    }
+    for (const p of expenseTrend) {
+      const k = keyOf(p.month, p.year);
+      expenseBy.set(k, p.total);
+      if (!seen.has(k)) {
+        seen.add(k);
+        order.push(k);
+      }
+    }
+
+    const income = order.map((k) => incomeBy.get(k) ?? 0);
+    const expense = order.map((k) => expenseBy.get(k) ?? 0);
+    const savings = order.map((_, i) => income[i] - expense[i]);
+    return { income, expense, savings };
+  }, [isDataReady, incomeData, expenseData]);
 
   const formatPct = (v: number) =>
     `${v > 0 ? "+" : ""}${v.toFixed(1)}% from last month`;
@@ -293,7 +350,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="h-full p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {isDataReady ? (
             <>
@@ -304,9 +361,9 @@ const DashboardPage: React.FC = () => {
                   Number.isNaN(incomeChangePct) ? null : formatPct(incomeChangePct)
                 }
                 changeTone={incomeTileTone}
-                icon={<Wallet className="h-5 w-5" />}
-                iconBg="bg-emerald-50"
-                iconFg="text-emerald-600"
+                valueTone="income"
+                sparklineData={sparkSeries.income}
+                sparklineTone="income"
               />
               <StatTile
                 title="Total Expenses"
@@ -317,9 +374,9 @@ const DashboardPage: React.FC = () => {
                     : formatPct(expenseChangePct)
                 }
                 changeTone={expenseTileTone}
-                icon={<TrendingDown className="h-5 w-5" />}
-                iconBg="bg-red-50"
-                iconFg="text-red-600"
+                valueTone="expense"
+                sparklineData={sparkSeries.expense}
+                sparklineTone="expense"
               />
               <StatTile
                 title="Net Savings"
@@ -328,9 +385,9 @@ const DashboardPage: React.FC = () => {
                   savingsChangePct === null ? null : formatPct(savingsChangePct)
                 }
                 changeTone={savingsTileTone}
-                icon={<PiggyBank className="h-5 w-5" />}
-                iconBg="bg-blue-50"
-                iconFg="text-blue-600"
+                valueTone="neutral"
+                sparklineData={sparkSeries.savings}
+                sparklineTone="savings"
               />
             </>
           ) : (
@@ -338,11 +395,16 @@ const DashboardPage: React.FC = () => {
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse"
+                  className="rounded-2xl border border-gray-200 bg-white p-5 animate-pulse"
                 >
-                  <div className="h-4 w-24 bg-gray-200 rounded mb-3"></div>
-                  <div className="h-7 w-32 bg-gray-200 rounded mb-3"></div>
-                  <div className="h-4 w-28 bg-gray-100 rounded"></div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="h-3 w-20 bg-gray-200 rounded mb-3" />
+                      <div className="h-8 w-32 bg-gray-200 rounded mb-3" />
+                      <div className="h-3 w-28 bg-gray-100 rounded" />
+                    </div>
+                    <div className="h-11 w-24 bg-gray-100 rounded" />
+                  </div>
                 </div>
               ))}
             </>
@@ -357,7 +419,7 @@ const DashboardPage: React.FC = () => {
                 expenseTrend={expenseData.monthlyTrend ?? []}
               />
             ) : (
-              <div className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse">
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 animate-pulse">
                 <div className="h-5 w-40 bg-gray-200 rounded mb-4"></div>
                 <div className="h-[280px] w-full bg-gray-100 rounded"></div>
               </div>
@@ -375,7 +437,7 @@ const DashboardPage: React.FC = () => {
                 currentUserName={user?.name}
               />
             ) : (
-              <div className="rounded-2xl border bg-white p-5 shadow-sm animate-pulse">
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 animate-pulse">
                 <div className="h-5 w-32 bg-gray-200 rounded mb-4"></div>
                 <div className="space-y-3">
                   {[0, 1, 2, 3, 4].map((i) => (

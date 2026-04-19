@@ -29,15 +29,17 @@ interface ExpenseTableProps {
   categoriesLoading?: boolean;
 }
 
+// Ring-style category badges: white fill, tinted ring + text. Quieter than filled pills,
+// and keeps color as a secondary identifier rather than competing with row content.
 const CATEGORY_BADGE_COLORS: Record<string, string> = {
-  Food: "bg-orange-100 text-orange-800",
-  Housing: "bg-indigo-100 text-indigo-800",
-  Transport: "bg-sky-100 text-sky-800",
-  Utilities: "bg-amber-100 text-amber-800",
-  Entertainment: "bg-pink-100 text-pink-800",
-  Medical: "bg-red-100 text-red-800",
-  Education: "bg-emerald-100 text-emerald-800",
-  Other: "bg-gray-100 text-gray-800",
+  Food: "ring-orange-200 text-orange-700",
+  Housing: "ring-indigo-200 text-indigo-700",
+  Transport: "ring-sky-200 text-sky-700",
+  Utilities: "ring-amber-200 text-amber-700",
+  Entertainment: "ring-pink-200 text-pink-700",
+  Medical: "ring-rose-200 text-rose-700",
+  Education: "ring-emerald-200 text-emerald-700",
+  Other: "ring-gray-200 text-gray-700",
 };
 
 const ExpenseTable: React.FC<ExpenseTableProps> = ({
@@ -188,9 +190,11 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
 
   const renderCategoryBadge = (categoryValue: number) => {
     const name = categoryNameByValue[categoryValue] ?? "Other";
-    const cls = CATEGORY_BADGE_COLORS[name] ?? "bg-gray-100 text-gray-800";
+    const cls = CATEGORY_BADGE_COLORS[name] ?? "ring-gray-200 text-gray-700";
     return (
-      <span className={`inline-block rounded-md border px-2 py-1 text-[11px] w-fit ${cls}`}>
+      <span
+        className={`inline-flex items-center rounded-md bg-white ring-1 px-2 py-0.5 text-[11px] font-medium w-fit ${cls}`}
+      >
         {name}
       </span>
     );
@@ -239,49 +243,55 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
         action={<AddButton label="Add Expense" onClick={handleOpenAddModal} />}
       >
         <table className="min-w-full text-sm table-auto">
-          <thead className="border-b bg-gray-50 text-left text-gray-600">
+          <thead className="border-b border-gray-200 text-left text-[11px] font-medium uppercase tracking-wider text-gray-500">
             <tr>
-              <th className="py-3 px-4 font-medium">Member</th>
-              <th className="py-3 px-4 font-medium">Description</th>
-              <th className="py-3 px-4 font-medium">Category</th>
-              <th className="py-3 px-4 font-medium">Amount</th>
-              <th className="py-3 px-4 font-medium">Date</th>
-              <th className="py-3 px-4 font-medium text-center">Actions</th>
+              <th className="py-3 px-4">Member</th>
+              <th className="py-3 px-4">Description</th>
+              <th className="py-3 px-4">Category</th>
+              <th className="py-3 px-4">Amount</th>
+              <th className="py-3 px-4">Date</th>
+              <th className="py-3 px-4 text-center">Actions</th>
             </tr>
           </thead>
-          <tbody className="text-gray-700">
+          <tbody className="divide-y divide-gray-100 text-gray-800">
             {expenses.map((expense) => (
-              <tr key={expense.id} className="border-b hover:bg-gray-50">
-                <td className="py-2 px-4">{getMemberDisplayName(expense.userId)}</td>
-                <td className="py-2 px-4">{expense.description}</td>
-                <td className="py-2 px-4">{renderCategoryBadge(expense.category)}</td>
-                <td className="py-2 px-4">{formatCurrency(expense.amount)}</td>
-                <td className="py-2 px-4">{formatIndianDate(expense.expenseDate)}</td>
-                <td className="py-2 px-4 flex items-center justify-center space-x-3">
-                  <Edit
-                    onClick={() =>
-                      canModifyExpense(expense) && handleOpenEditModal(expense)
-                    }
-                    width={18}
-                    height={18}
-                    className={
-                      canModifyExpense(expense)
-                        ? "cursor-pointer text-blue-600 hover:text-blue-800"
-                        : "cursor-not-allowed text-gray-300"
-                    }
-                    aria-disabled={!canModifyExpense(expense)}
-                  />
-                  <Trash
-                    width={18}
-                    height={18}
-                    onClick={() => openDeleteConfirm(expense)}
-                    className={
-                      canModifyExpense(expense)
-                        ? "cursor-pointer text-red-600 hover:text-red-800"
-                        : "cursor-not-allowed text-gray-300"
-                    }
-                    aria-disabled={!canModifyExpense(expense)}
-                  />
+              <tr key={expense.id} className="hover:bg-gray-50/60 transition-colors">
+                <td className="py-3 px-4">{getMemberDisplayName(expense.userId)}</td>
+                <td className="py-3 px-4">{expense.description}</td>
+                <td className="py-3 px-4">{renderCategoryBadge(expense.category)}</td>
+                <td className="py-3 px-4 tabular-nums font-medium text-gray-900">
+                  {formatCurrency(expense.amount)}
+                </td>
+                <td className="py-3 px-4 tabular-nums text-gray-600">
+                  {formatIndianDate(expense.expenseDate)}
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center justify-center gap-3">
+                    <Edit
+                      onClick={() =>
+                        canModifyExpense(expense) && handleOpenEditModal(expense)
+                      }
+                      width={16}
+                      height={16}
+                      className={
+                        canModifyExpense(expense)
+                          ? "cursor-pointer text-gray-500 hover:text-gray-900 transition-colors"
+                          : "cursor-not-allowed text-gray-300"
+                      }
+                      aria-disabled={!canModifyExpense(expense)}
+                    />
+                    <Trash
+                      width={16}
+                      height={16}
+                      onClick={() => openDeleteConfirm(expense)}
+                      className={
+                        canModifyExpense(expense)
+                          ? "cursor-pointer text-rose-500 hover:text-rose-700 transition-colors"
+                          : "cursor-not-allowed text-gray-300"
+                      }
+                      aria-disabled={!canModifyExpense(expense)}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}

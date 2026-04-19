@@ -8,7 +8,7 @@ interface IncomeTrendChartProps {
 
 const IncomeTrendChart: React.FC<IncomeTrendChartProps> = ({ monthlyTrend }) => {
   const data = monthlyTrend.map((m) => ({ name: m.month, value: m.total }));
-  return <TrendChart title="Income Trend" data={data} color="#16a34a" />;
+  return <TrendChart title="Income Trend" data={data} color="#059669" />;
 };
 
 export default IncomeTrendChart;

@@ -1,8 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
-import { Link as LinkIcon, Users } from "lucide-react";
+import { KeyRound, Users, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { useAppDispatch } from "@/app/hooks/useAuth";
 import { useRouter } from "next/navigation";
@@ -10,7 +9,7 @@ import Button from "@/app/components/ui/Button";
 import { useCreateFamilyMutation } from "@/app/services/api/familyAPI";
 import { setUserFamilyId } from "@/app/services/slices/authSlice";
 
-export default function CreateFamilySection() {
+export default function CreateFamilyPage() {
   const [activeTab, setActiveTab] = useState<"create" | "join">("create");
   const [familyName, setFamilyName] = useState("");
   const [localError, setLocalError] = useState("");
@@ -24,7 +23,6 @@ export default function CreateFamilySection() {
       setLocalError("Family name is required.");
       return false;
     }
-
     setLocalError("");
     return true;
   };
@@ -33,12 +31,8 @@ export default function CreateFamilySection() {
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
-
     if (!validateInputs()) return;
-
-    if (activeTab === "join") {
-      return;
-    }
+    if (activeTab === "join") return;
 
     try {
       const response = await createFamily({
@@ -52,129 +46,168 @@ export default function CreateFamilySection() {
   };
 
   return (
-    <div className="flex items-center justify-between max-w-7xl mx-auto py-24 px-6">
-      <div className="w-[55%] space-y-8">
-        <div className="space-y-1">
-          <h1 className="text-5xl font-bold leading-tight">
-            {"Let's"} start tracking your <br /> family expenses
-          </h1>
+    <div className="relative min-h-screen w-full bg-gradient-to-br from-emerald-50/80 via-white to-indigo-50/60">
+      {/* Subtle dot pattern */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, #0f172a 1px, transparent 0)",
+          backgroundSize: "24px 24px",
+        }}
+      />
 
-          <p className="text-gray-600 text-lg max-w-xl">
-            Take control of your family finances. Track income, expenses, and
-            achieve goals together.
-          </p>
-        </div>
-
-        <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab("create");
-              setLocalError("");
-            }}
-            className={`w-48 p-4 rounded-xl border flex flex-col items-start transition
-              ${
-                activeTab === "create"
-                  ? "bg-blue-50 border-blue-500 text-blue-600"
-                  : "border-gray-300 hover:bg-gray-100"
-              }
-            `}
-          >
-            <div className="flex items-center gap-2">
-              <Users />
-              <span className="font-semibold">Create Family</span>
-            </div>
-            <span className="text-gray-500 text-sm mt-1">Start fresh</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab("join");
-              setLocalError("");
-            }}
-            className={`w-48 p-4 rounded-xl border flex flex-col items-start transition
-              ${
-                activeTab === "join"
-                  ? "bg-blue-50 border-blue-500 text-blue-600"
-                  : "border-gray-300 hover:bg-gray-100"
-              }
-            `}
-          >
-            <div className="flex items-center gap-2">
-              <LinkIcon />
-              <span className="font-semibold">Join Family</span>
-            </div>
-            <span className="text-gray-500 text-sm mt-1">Use code at register</span>
-          </button>
-        </div>
-
-        {activeTab === "create" && (
+      <div className="relative mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-4 py-16 sm:px-6">
+        <div className="space-y-8">
           <div className="space-y-3">
-            <label className="text-gray-800 font-medium">Family Name</label>
+            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              One more step
+            </span>
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+              Set up your family workspace
+            </h1>
+            <p className="text-base leading-relaxed text-gray-600">
+              Create a new family or join an existing one to start tracking
+              finances together.
+            </p>
+          </div>
 
-            <input
-              type="text"
-              placeholder="e.g., The Sharma Family"
-              className={`w-full border rounded-xl px-4 py-3 text-gray-700 focus:ring-2 focus:outline-none
-                ${
-                  localError && familyName.trim() === ""
-                    ? "border-red-500 focus:ring-red-400"
-                    : "border-gray-300 focus:ring-blue-500"
-                }
-              `}
-              onChange={(e) => setFamilyName(e.target.value)}
-              value={familyName}
-            />
-
-            {localError && <p className="text-red-500 text-sm">{localError}</p>}
-
-            <Button
-              className="w-48"
-              onClick={handleFamilyCreation}
-              variant="primary"
-              isLoading={isLoading}
-              disabled={isLoading}
+          {/* Tab selector */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("create");
+                setLocalError("");
+              }}
+              className={`flex flex-col items-start rounded-xl border p-4 text-left transition-colors ${
+                activeTab === "create"
+                  ? "border-indigo-500 bg-indigo-50/60 ring-1 ring-indigo-200"
+                  : "border-gray-200 bg-white hover:border-gray-300"
+              }`}
             >
-              {isLoading ? "Creating..." : "Create Family →"}
-            </Button>
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 ring-1 ring-emerald-100 text-emerald-600">
+                <Users className="h-4 w-4" />
+              </span>
+              <span className="mt-3 text-sm font-semibold text-gray-900">
+                Create a family
+              </span>
+              <span className="mt-0.5 text-xs text-gray-500">
+                You become the admin
+              </span>
+            </button>
 
-            <p className="text-gray-500 text-sm mt-1">
-              You can invite family members from the Members page after setup.
-            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("join");
+                setLocalError("");
+              }}
+              className={`flex flex-col items-start rounded-xl border p-4 text-left transition-colors ${
+                activeTab === "join"
+                  ? "border-indigo-500 bg-indigo-50/60 ring-1 ring-indigo-200"
+                  : "border-gray-200 bg-white hover:border-gray-300"
+              }`}
+            >
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 ring-1 ring-indigo-100 text-indigo-600">
+                <KeyRound className="h-4 w-4" />
+              </span>
+              <span className="mt-3 text-sm font-semibold text-gray-900">
+                Join a family
+              </span>
+              <span className="mt-0.5 text-xs text-gray-500">
+                Use an invite code
+              </span>
+            </button>
           </div>
-        )}
 
-        {activeTab === "join" && (
-          <div className="space-y-4 rounded-xl border border-gray-200 bg-gray-50 p-5">
-            <p className="text-gray-700">
-              Joining happens at <strong>registration</strong>. Ask your family admin for an
-              invitation code (Members → Generate new code), then{" "}
-              <Link href="/register" className="text-blue-600 font-medium underline">
-                create an account
-              </Link>{" "}
-              and choose <strong>Join with code</strong>.
-            </p>
-            <p className="text-sm text-gray-500">
-              If you already have an account without a family, contact support or ask an admin —
-              this screen is for creating a new family while logged in.
-            </p>
-          </div>
-        )}
+          {/* Panel content */}
+          {activeTab === "create" ? (
+            <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6">
+              <div className="space-y-2">
+                <label
+                  htmlFor="familyName"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Family name
+                </label>
+                <input
+                  id="familyName"
+                  type="text"
+                  placeholder="e.g., The Sharma Family"
+                  className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                    localError && familyName.trim() === ""
+                      ? "border-rose-300 focus:border-rose-500 focus:ring-rose-500/20"
+                      : "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500/20"
+                  }`}
+                  onChange={(e) => setFamilyName(e.target.value)}
+                  value={familyName}
+                />
+                {localError && (
+                  <p className="text-sm text-rose-600">{localError}</p>
+                )}
+              </div>
 
-        {error && (
-          <p className="text-red-600 text-sm mt-2">Something went wrong!</p>
-        )}
-      </div>
+              <Button
+                onClick={handleFamilyCreation}
+                variant="primary"
+                isLoading={isLoading}
+                disabled={isLoading}
+                className="w-full sm:w-auto"
+              >
+                {isLoading ? "Creating…" : (
+                  <span className="inline-flex items-center gap-2">
+                    Create family
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                )}
+              </Button>
 
-      <div className="w-[45%] flex justify-center">
-        <Image
-          src="/family-illustration.png"
-          alt="Family Illustration"
-          width={500}
-          height={400}
-          className="object-contain"
-        />
+              <p className="text-xs text-gray-500">
+                You can invite family members from the Members page after setup.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-6">
+              <p className="text-sm leading-relaxed text-gray-700">
+                Joining a family happens at{" "}
+                <strong className="font-semibold">registration</strong>. Ask your
+                family admin for an invitation code (Members → Generate new
+                code), then{" "}
+                <Link
+                  href="/register"
+                  className="font-medium text-indigo-600 hover:text-indigo-700"
+                >
+                  create an account
+                </Link>{" "}
+                and pick <strong className="font-semibold">Join with code</strong>.
+              </p>
+              <p className="text-xs text-gray-500">
+                Already have an account without a family? Contact an admin —
+                this screen is only for creating a new family while logged in.
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-lg bg-white p-3 text-sm text-rose-700 ring-1 ring-rose-200">
+              Something went wrong. Please try again.
+            </div>
+          )}
+
+          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-gray-500">
+            <li className="inline-flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-emerald-600" />
+              Invite up to your whole household
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-emerald-600" />
+              Shared income &amp; expense view
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

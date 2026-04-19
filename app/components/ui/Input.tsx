@@ -55,11 +55,11 @@ export const Input: React.FC<InputProps> = ({
   const paddingRightClass = needsRightPadding ? "pr-10" : "pr-3";
 
   const baseInputClasses = `
-    w-full rounded-lg border py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+    w-full rounded-lg border py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
     ${icon ? "pl-10" : "pl-3"} 
     ${paddingRightClass} 
-    ${error ? "border-red-500" : "border-gray-300"}
-    ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}
+    ${error ? "border-rose-500" : "border-gray-200"}
+    ${disabled ? "bg-gray-50 cursor-not-allowed" : ""}
   `;
 
   const iconWrapperClasses = "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none";
@@ -117,7 +117,7 @@ export const Input: React.FC<InputProps> = ({
           />
         )}
         {actionIcon && !isLoading && (
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+          <span className="absolute right-3 top-1/2 flex -translate-y-1/2 transform items-center text-gray-400">
             {actionIcon}
           </span>
         )}
@@ -127,7 +127,7 @@ export const Input: React.FC<InputProps> = ({
           </span>
         )}
       </div>
-      {error && <span className="text-xs text-red-500">{error}</span>}
+      {error && <span className="text-xs text-rose-600">{error}</span>}
       {helperText && !error && (
         <span className="text-xs text-gray-500">{helperText}</span>
       )}

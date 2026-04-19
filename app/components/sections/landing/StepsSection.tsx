@@ -1,58 +1,54 @@
+const steps = [
+  {
+    n: "01",
+    title: "Create your account",
+    description:
+      "Sign up in under a minute. Your family workspace is ready before your chai is.",
+  },
+  {
+    n: "02",
+    title: "Invite your family",
+    description:
+      "Share a one-tap invite code. Each member joins as admin or contributor — you decide.",
+  },
+  {
+    n: "03",
+    title: "Start tracking together",
+    description:
+      "Log income, log expenses, and watch the trends build. The dashboard tells the story.",
+  },
+];
+
 const StepsSection = () => {
   return (
-    <section className="w-full bg-white py-20">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Heading */}
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Get Started in Minutes
-          </h2>
-          <p className="text-gray-600 mt-3 max-w-xl mx-auto">
-            Setting up your family finance workspace is fast, simple, and
-            completely secure.
+    <section className="w-full bg-gray-50 py-20 sm:py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="max-w-2xl">
+          <p className="text-xs font-medium uppercase tracking-wider text-indigo-700">
+            How it works
           </p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+            Three steps to a shared financial picture.
+          </h2>
         </div>
 
-        {/* Steps Grid */}
-        <div className="grid md:grid-cols-3 gap-10">
-          {/* Step 1 */}
-          <div className="text-center px-6">
-            <div className="w-16 h-16 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-bold shadow-md">
-              1
+        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+          {steps.map(({ n, title, description }) => (
+            <div
+              key={n}
+              className="rounded-2xl border border-gray-200 bg-white p-6"
+            >
+              <span className="inline-flex items-center justify-center rounded-lg bg-white px-2.5 py-1 text-sm font-semibold tabular-nums text-gray-900 ring-1 ring-gray-200">
+                {n}
+              </span>
+              <h3 className="mt-5 text-lg font-semibold tracking-tight text-gray-900">
+                {title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                {description}
+              </p>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mt-6">
-              Create Your Account
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Sign up for free and set up your personal or family workspace.
-            </p>
-          </div>
-
-          {/* Step 2 */}
-          <div className="text-center px-6">
-            <div className="w-16 h-16 mx-auto rounded-full bg-green-600 text-white flex items-center justify-center text-2xl font-bold shadow-md">
-              2
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mt-6">
-              Add Family Members
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Invite your partner or family members to collaborate in real time.
-            </p>
-          </div>
-
-          {/* Step 3 */}
-          <div className="text-center px-6">
-            <div className="w-16 h-16 mx-auto rounded-full bg-purple-600 text-white flex items-center justify-center text-2xl font-bold shadow-md">
-              3
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mt-6">
-              Start Tracking Finances
-            </h3>
-            <p className="text-gray-600 mt-2">
-              Add expenses, set budgets, and monitor spending effortlessly.
-            </p>
-          </div>
+          ))}
         </div>
       </div>
     </section>

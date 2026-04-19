@@ -12,9 +12,11 @@ const TableContainer: React.FC<TableContainerProps> = ({
   action,
 }) => {
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+        <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+          {title}
+        </p>
         {action}
       </div>
       <div className="overflow-x-auto">{children}</div>

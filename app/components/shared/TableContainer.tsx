@@ -12,8 +12,8 @@ const TableContainer: React.FC<TableContainerProps> = ({
   action,
 }) => {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
           {title}
         </p>

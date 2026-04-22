@@ -180,7 +180,7 @@ export default function MembersPage() {
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6 p-4 sm:p-6">
         {familyId && !membersLoading && !membersError && (
           <p className="text-xs font-medium uppercase tracking-wider text-gray-500 tabular-nums">
             {members.length} total · {adminCount} admin{adminCount !== 1 ? "s" : ""} ·{" "}
@@ -204,7 +204,7 @@ export default function MembersPage() {
           ) : members.length === 0 ? (
             <p className="py-8 text-sm text-gray-600">No members found.</p>
           ) : (
-            <table className="min-w-full text-sm table-auto">
+            <table className="hidden min-w-full table-auto text-sm md:table">
               <thead className="border-b border-gray-200 text-left text-[11px] font-medium uppercase tracking-wider text-gray-500">
                 <tr>
                   <th className="py-3 px-4">Member</th>
@@ -331,9 +331,110 @@ export default function MembersPage() {
               </tbody>
             </table>
           )}
+
+          {/* Mobile: card list (shown when we have members) */}
+          {familyId && !membersLoading && !membersError && members.length > 0 && (
+            <ul className="flex flex-col gap-3 md:hidden">
+              {members.map((m) => {
+                const roleLabel = formatRoleLabel(m.role);
+                const isSelf = user?.id === m.id;
+                const targetable = canTargetMember(m);
+                const lastAdmin = isLastAdmin(m);
+                return (
+                  <li
+                    key={`${m.id}-card`}
+                    className="rounded-xl border border-gray-200 bg-white p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
+                          <span className="truncate">{m.fullName}</span>
+                          {isSelf && (
+                            <span className="inline-flex items-center rounded-md bg-white ring-1 ring-indigo-200 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+                              You
+                            </span>
+                          )}
+                        </p>
+                        <p className="mt-0.5 truncate text-xs text-gray-500">
+                          {m.email}
+                        </p>
+                      </div>
+                      <span
+                        className={
+                          roleLabel === "Admin"
+                            ? "shrink-0 inline-flex items-center rounded-md bg-white ring-1 ring-amber-200 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+                            : "shrink-0 inline-flex items-center rounded-md bg-white ring-1 ring-gray-200 px-2 py-0.5 text-[11px] font-medium text-gray-600"
+                        }
+                      >
+                        {roleLabel}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-xs tabular-nums text-gray-500">
+                      Joined{" "}
+                      {m.createdOn
+                        ? new Date(m.createdOn).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "—"}
+                    </p>
+
+                    {isViewerAdmin && (
+                      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3">
+                        {roleLabel === "Member" ? (
+                          <button
+                            type="button"
+                            disabled={!targetable}
+                            onClick={() => openRoleChangeConfirm(m, "Admin")}
+                            className={
+                              targetable
+                                ? "inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-emerald-200 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+                                : "inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-400 cursor-not-allowed"
+                            }
+                          >
+                            <ArrowUp className="h-3.5 w-3.5" />
+                            Promote
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={!targetable || lastAdmin}
+                            onClick={() => openRoleChangeConfirm(m, "Member")}
+                            className={
+                              targetable && !lastAdmin
+                                ? "inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-amber-200 px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                                : "inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-400 cursor-not-allowed"
+                            }
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                            Demote
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          disabled={!targetable || lastAdmin}
+                          onClick={() => openRemoveConfirm(m)}
+                          className={
+                            targetable && !lastAdmin
+                              ? "ml-auto inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-rose-200 px-2.5 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50"
+                              : "ml-auto inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-300 cursor-not-allowed"
+                          }
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </TableContainer>
 
-        <div className="rounded-2xl border border-gray-200 bg-white p-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wider text-gray-500">

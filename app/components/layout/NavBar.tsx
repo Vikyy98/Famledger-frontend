@@ -3,7 +3,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, LogOut, Mail, Settings, User } from "lucide-react";
+import {
+  ChevronDown,
+  LogOut,
+  Mail,
+  Menu,
+  Settings,
+  User,
+} from "lucide-react";
 import { navItems } from "./SideBar";
 import { useAppDispatch, useAppSelector } from "@/app/hooks/useAuth";
 import { logoutUser } from "@/app/services/slices/authSlice";
@@ -29,7 +36,11 @@ const roleLabel = (role?: string) => {
   return "Member";
 };
 
-function NavBar() {
+interface NavBarProps {
+  onOpenMobileNav?: () => void;
+}
+
+function NavBar({ onOpenMobileNav }: NavBarProps) {
   const pathName = usePathname();
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
@@ -86,17 +97,29 @@ function NavBar() {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-4 px-6 py-4 bg-white border-b border-gray-200">
-      <div className="min-w-0">
-        <h1 className="text-xl font-semibold text-gray-900 truncate">
-          {pageTitle}
-        </h1>
-        {subtitle && (
-          <p className="text-sm text-gray-500 truncate">{subtitle}</p>
-        )}
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        <button
+          type="button"
+          onClick={onOpenMobileNav}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 lg:hidden"
+          aria-label="Open menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="min-w-0">
+          <h1 className="truncate text-lg font-semibold text-gray-900 sm:text-xl">
+            {pageTitle}
+          </h1>
+          {subtitle && (
+            <p className="hidden truncate text-sm text-gray-500 sm:block">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-3 shrink-0" ref={menuRef}>
+      <div className="flex shrink-0 items-center gap-3" ref={menuRef}>
         <button
           type="button"
           onClick={() => setIsMenuOpen((prev) => !prev)}
@@ -127,7 +150,7 @@ function NavBar() {
         {isMenuOpen && (
           <div
             role="menu"
-            className="absolute right-6 top-full mt-2 w-72 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-30"
+            className="absolute right-4 top-full z-30 mt-2 w-[calc(100vw-2rem)] max-w-xs overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg sm:right-6 sm:w-72"
           >
             <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
               <div className="w-10 h-10 bg-indigo-50 ring-1 ring-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold">

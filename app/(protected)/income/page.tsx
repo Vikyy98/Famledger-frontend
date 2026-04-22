@@ -49,7 +49,7 @@ const IncomePage: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6 p-4 sm:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Suspense fallback={<IncomeSummarySkeleton />}>
             {isDataReady ? (

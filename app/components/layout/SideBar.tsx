@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  PiggyBank,
   LayoutDashboard,
   DollarSign,
   Wallet,
@@ -11,6 +10,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect } from "react";
+import Logo from "./Logo";
 
 export interface NavItem {
   name: string;
@@ -85,11 +85,9 @@ function SideBar({ isMobileOpen = false, onCloseMobile }: SideBarProps) {
         }`}
       >
         <div className="flex items-center justify-between px-4 py-4">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-600">
-              <PiggyBank className="h-5 w-5" />
-            </span>
-            <span className="text-lg font-semibold tracking-tight text-gray-900">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Logo className="h-8 w-8" />
+            <span className="text-lg font-bold text-gray-900">
               FamLedger
             </span>
           </Link>

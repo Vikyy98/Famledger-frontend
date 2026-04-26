@@ -5,10 +5,15 @@ export interface ExpenseDetails {
   description: string;
   category: number;
   amount: number;
-  expenseDate: string; // ISO date string (yyyy-MM-dd)
+  expenseDate: string; // ISO date string (yyyy-MM-dd). For recurring rows the backend
+  // surfaces StartDate here so the same shape works for the table.
   status: boolean;
   createdOn: string;
   updatedOn?: string;
+  // Backend echoes these on every row so the UI can route updates/deletes to
+  // the correct table (1 = recurring, 2 = one-time).
+  type: number;
+  frequency?: string;
 }
 
 export interface CategoryBreakdown {
@@ -27,6 +32,8 @@ export interface ExpenseMonthlyTrend {
 export interface ExpenseResponse {
   familyId: number;
   totalExpense: string;
+  totalRecurringExpense: string;
+  recurringExpenseCount: number;
   percentageDifference: string;
   expenses: ExpenseDetails[];
   categoryBreakdown: CategoryBreakdown[];
@@ -40,15 +47,21 @@ export interface AddExpenseRequest {
   category: number;
   amount: number;
   expenseDate: string; // yyyy-MM-dd
+  type: number; // 1 = recurring, 2 = one-time
+  frequency?: string; // ONETIME | MONTHLY (extendable later)
 }
 
+/** routeType = original row kind (URL segment); type = desired type from form (body). */
 export interface UpdateExpenseRequest extends AddExpenseRequest {
   id: number;
+  routeType: number;
 }
 
+/** routeType = expense row kind (1 recurring, 2 one-time) for URL segment */
 export interface DeleteExpenseArgs {
   id: number;
   familyId: number;
+  routeType: number;
 }
 
 export interface ExpenseCategoryOption {

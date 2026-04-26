@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
-import Link from "next/link";
 import { useLoginUserMutation } from "@/app/services/api/authAPI";
 import { LoginRequest } from "@/app/types/auth";
 import { useRouter } from "next/navigation";
@@ -104,17 +103,8 @@ export default function LoginForm() {
         error={emailError}
       />
 
-      {/* Password Input */}
       <div className="space-y-1">
-        <div className="flex justify-between items-center">
-          <label className="text-sm font-medium text-gray-700">Password</label>
-          <Link
-            href="/forgot-password"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            Forgot?
-          </Link>
-        </div>
+        <label className="text-sm font-medium text-gray-700">Password</label>
         <Input
           placeholder="Enter your password"
           type={showPassword ? "text" : "password"}
@@ -131,7 +121,10 @@ export default function LoginForm() {
         />
       </div>
 
-      {/* Sign-in Button */}
+      {/* TODO(post-MVP): Add "Forgot password?" link here once the reset-password
+          flow is built (token-based email reset). For now, locked-out users contact
+          their family admin or support directly. */}
+
       <Button
         className="w-full"
         variant="primary"

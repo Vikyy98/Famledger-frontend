@@ -3,7 +3,7 @@ import TableContainer from "../shared/TableContainer";
 import AddButton from "../shared/AddButton";
 import ConfirmModal from "../shared/ConfirmModal";
 import IncomeModal, { IncomeFormData } from "./IncomeModal";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Repeat, Trash } from "lucide-react";
 import { AddIncomeRequest, IncomeDetails, UpdateIncomeRequest } from "@/app/types/income";
 import {
   useAddIncomeMutation,
@@ -70,6 +70,17 @@ const IncomeTable: React.FC<IncomeTableState> = ({
     const normalized = frequency.trim().toUpperCase();
     if (normalized === "ONETIME") return "";
     return normalized.charAt(0) + normalized.slice(1).toLowerCase();
+  };
+
+  const renderRecurringBadge = (income: IncomeDetails) => {
+    if (income.type !== 1) return null;
+    const label = getFrequencyLabel(income.frequency) || "Monthly";
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-emerald-200 px-2 py-0.5 text-[11px] font-medium text-emerald-700 w-fit">
+        <Repeat className="h-3 w-3" />
+        {label}
+      </span>
+    );
   };
 
   const formatCurrency = (amount: number) =>
@@ -243,11 +254,7 @@ const IncomeTable: React.FC<IncomeTableState> = ({
                     <span className="inline-flex items-center rounded-md bg-white ring-1 ring-emerald-200 px-2 py-0.5 text-[11px] font-medium text-emerald-700 w-fit">
                       {getIncomeTypeLabel(income.type)}
                     </span>
-                    {getFrequencyLabel(income.frequency) && (
-                      <span className="text-[11px] text-gray-500">
-                        {getFrequencyLabel(income.frequency)}
-                      </span>
-                    )}
+                    {renderRecurringBadge(income)}
                   </div>
                 </td>
                 <td className="py-3 px-4 tabular-nums font-medium text-gray-900">
@@ -307,11 +314,7 @@ const IncomeTable: React.FC<IncomeTableState> = ({
                 <span className="inline-flex items-center rounded-md bg-white ring-1 ring-emerald-200 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                   {getIncomeTypeLabel(income.type)}
                 </span>
-                {getFrequencyLabel(income.frequency) && (
-                  <span className="text-[11px] text-gray-500">
-                    {getFrequencyLabel(income.frequency)}
-                  </span>
-                )}
+                {renderRecurringBadge(income)}
                 <span className="ml-auto text-xs tabular-nums text-gray-500">
                   {formatIndianDate(income.dateReceived)}
                 </span>

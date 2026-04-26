@@ -1,0 +1,46 @@
+import React from "react";
+
+type LogoProps = {
+  className?: string;
+  ariaLabel?: string;
+};
+
+const Logo: React.FC<LogoProps> = ({ className = "h-7 w-7", ariaLabel = "FamLedger" }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 64 64"
+    fill="none"
+    role="img"
+    aria-label={ariaLabel}
+    className={className}
+  >
+    <path d="M22 17 L26 14 L28 22 Z" fill="#047857" />
+    <path
+      d="M52 32
+         C52 41 44 48 33 48
+         C30 48 27 47.5 24.5 46.5
+         L24 51 C24 52 23 53 22 53 L19 53 C18 53 17 52 17 51 L17 43.5
+         C14 41 12 37 12 33
+         C12 32 11 31.5 10.5 31.5 C9 31.5 9 30 10 29.5 L13 28
+         C16 22 23 18 33 18
+         C44 18 52 24 52 32 Z
+         M44 52 L44 47 C45 46.5 46 46 47 45.5 L47 51
+         C47 52 46 53 45 53 L42 53 C41 53 40 52 40 51 L40 50 Z"
+      fill="#10b981"
+    />
+    <ellipse cx="48" cy="33" rx="6" ry="5" fill="#047857" />
+    <ellipse cx="48" cy="33" rx="1.5" ry="2" fill="#022c22" />
+    <circle cx="40" cy="28" r="2.4" fill="#022c22" />
+    <circle cx="40.6" cy="27.4" r="0.8" fill="#fff" />
+    <rect x="28" y="20" width="9" height="2.4" rx="1.2" fill="#047857" />
+    <path
+      d="M14 30 q-3 -1 -2 -4 q1 -2 3 -1"
+      stroke="#047857"
+      strokeWidth="2"
+      strokeLinecap="round"
+      fill="none"
+    />
+  </svg>
+);
+
+export default Logo;

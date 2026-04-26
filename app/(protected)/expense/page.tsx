@@ -8,6 +8,8 @@ import ExpenseTable from "@/app/components/expense/ExpenseTable";
 import CategoryBreakdownCard from "@/app/components/expense/CategoryBreakdownCard";
 import ExpenseSummarySkeleton from "@/app/components/expense/ExpenseSummarySkeleton";
 import ExpenseTableSkeleton from "@/app/components/expense/ExpenseTableSkeleton";
+import RecurringExpenseCard from "@/app/components/expense/RecurringExpenseCard";
+import RecurringExpenseCardSkeleton from "@/app/components/expense/RecurringExpenseCardSkeleton";
 import {
   useGetExpenseDetailsQuery,
   useGetExpenseCategoriesQuery,
@@ -74,6 +76,17 @@ const ExpensePage: React.FC = () => {
             </div>
           )}
         </div>
+
+        <Suspense fallback={<RecurringExpenseCardSkeleton />}>
+          {isDataReady ? (
+            <RecurringExpenseCard
+              totalRecurringExpenseAmount={data.totalRecurringExpense}
+              recurringExpenseCount={data.recurringExpenseCount}
+            />
+          ) : (
+            <RecurringExpenseCardSkeleton />
+          )}
+        </Suspense>
 
         {isDataReady ? (
           <CategoryBreakdownCard

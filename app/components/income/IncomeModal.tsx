@@ -30,16 +30,29 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const toFormData = (data?: IncomeDetails): IncomeFormData => ({
-    id: data?.id,
-    source: data?.source || "",
-    amount: data?.amount?.toString() || "",
-    date: data?.dateReceived || "",
-    incomeType: data?.type === 1 ? "RECURRING" : "ONETIME",
-    recurringFrequency: data?.frequency === "MONTHLY" || data?.frequency === "QUARTERLY" || data?.frequency === "YEARLY"
-      ? data.frequency
-      : "",
-  });
+  const toFormData = (data?: IncomeDetails): IncomeFormData => {
+    const normalizedFreq = (data?.frequency ?? "").trim().toUpperCase();
+    return {
+      id: data?.id,
+      source: data?.source || "",
+      amount: data?.amount?.toString() || "",
+      date: data?.dateReceived || "",
+      incomeType: data?.type === 1 ? "RECURRING" : "ONETIME",
+      recurringFrequency:
+        normalizedFreq === "MONTHLY" || normalizedFreq === "QUARTERLY" || normalizedFreq === "YEARLY"
+          ? normalizedFreq
+          : "",
+    };
+  };
+
+  // Local YYYY-MM-DD; toISOString() would shift to UTC and reject today east of UTC.
+  const todayStr = React.useMemo(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }, []);
 
   const [formData, setFormData] = useState<IncomeFormData>({
     ...toFormData(initialData),
@@ -47,7 +60,6 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
 
   const [errors, setErrors] = useState<IncomeFormErrors>({});
 
-  // Handle form input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -56,7 +68,6 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     if (errors[name as keyof IncomeFormData]) {
       setErrors((prev) => ({
         ...prev,
@@ -65,7 +76,6 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
     }
   };
 
-  // Validate form
   const validateForm = (): boolean => {
     const newErrors: IncomeFormErrors = {};
 
@@ -81,13 +91,8 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
 
     if (!formData.date.trim()) {
       newErrors.date = "Date is required";
-    } else {
-      const selectedDate = new Date(formData.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate > today) {
-        newErrors.date = "Date cannot be later than today";
-      }
+    } else if (formData.date > todayStr) {
+      newErrors.date = "Date cannot be later than today";
     }
 
     if (mode === "add" && formData.incomeType === "RECURRING" && !formData.recurringFrequency) {
@@ -98,7 +103,6 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   React.useEffect(() => {
     if (!isOpen) return;
     setFormData(toFormData(initialData));
@@ -126,7 +130,6 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
     }
   };
 
-  // Handle modal close
   const handleClose = () => {
     setFormData({
       source: "",
@@ -139,14 +142,12 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
     onClose();
   };
 
-  // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       handleClose();
     }
   };
 
-  // Don't render if modal is not open
   if (!isOpen) return null;
 
   return (
@@ -155,14 +156,15 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
       onClick={handleBackdropClick}
     >
       <div className="mx-auto my-6 w-full max-w-md rounded-lg bg-white shadow-xl transform transition-all">
-        {/* Modal Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
               {mode === "add" ? "Add New Income" : "Edit Income"}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              {mode === "add" ? "Record a new income entry for your family." : "Edit the income entry for your family."}
+              {mode === "add"
+                ? "Record a one-time or recurring income entry for your family."
+                : "Edit the income entry for your family."}
             </p>
           </div>
           <button
@@ -174,9 +176,7 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
           </button>
         </div>
 
-        {/* Modal Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Source Input */}
           <Input
             label="Source"
             name="source"
@@ -188,7 +188,6 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
             error={errors.source}
           />
 
-          {/* Amount Input */}
           <Input
             label="Amount"
             name="amount"
@@ -257,20 +256,24 @@ const IncomeModal: React.FC<IncomeModalProps> = ({
             </div>
           )}
 
-          {/* Date Input */}
           <Input
-            label="Date received"
+            label={formData.incomeType === "RECURRING" ? "Start date" : "Date received"}
             name="date"
             type="date"
             value={formData.date}
             onChange={handleChange}
             icon={<Calendar className="w-4 h-4" />}
             error={errors.date}
-            helperText={!formData.date ? "Select a date (DD/MM/YYYY format)" : undefined}
-            max={new Date().toISOString().split("T")[0]}
+            helperText={
+              !formData.date
+                ? "Select a date (DD/MM/YYYY format)"
+                : formData.incomeType === "RECURRING"
+                ? "The first month this income applies from"
+                : undefined
+            }
+            max={todayStr}
           />
 
-          {/* Modal Footer */}
           <div className="flex justify-end gap-3 pt-4">
             <Button
               type="button"

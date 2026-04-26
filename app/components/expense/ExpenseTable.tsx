@@ -3,7 +3,7 @@ import TableContainer from "../shared/TableContainer";
 import AddButton from "../shared/AddButton";
 import ConfirmModal from "../shared/ConfirmModal";
 import ExpenseModal, { ExpenseFormData } from "./ExpenseModal";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Trash, Repeat } from "lucide-react";
 import {
   AddExpenseRequest,
   ExpenseCategoryOption,
@@ -123,11 +123,15 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
       await deleteExpenseMutation({
         id: expense.id,
         familyId: expense.familyId,
+        routeType: expense.type,
       }).unwrap();
       dispatch(
         expenseApi.util.updateQueryData("getExpenseDetails", expense.familyId, (draft) => {
           if (!draft.expenses) return;
-          draft.expenses = draft.expenses.filter((x) => x.id !== expense.id);
+          // recurring & one-time share an id space, match on (id, type).
+          draft.expenses = draft.expenses.filter(
+            (x) => !(x.id === expense.id && x.type === expense.type)
+          );
         })
       );
       setPendingDelete(null);
@@ -141,6 +145,7 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
   const handleSubmitExpense = async (formData: ExpenseFormData) => {
     try {
       if (modalMode === "edit" && selectedExpense) {
+        // Type & frequency are immutable on edit — always use the existing row's values.
         const payload: AddExpenseRequest = {
           userId: user?.id,
           familyId: user?.familyId,
@@ -148,23 +153,32 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
           category: parseInt(formData.category, 10),
           amount: parseFloat(formData.amount),
           expenseDate: formData.expenseDate,
+          type: selectedExpense.type,
+          frequency:
+            selectedExpense.type === 1
+              ? selectedExpense.frequency?.toUpperCase() || "MONTHLY"
+              : "ONETIME",
         };
-        const updateRequest: UpdateExpenseRequest & { familyId: number } = {
+        const updateRequest: UpdateExpenseRequest = {
           ...payload,
           id: selectedExpense.id,
           familyId: selectedExpense.familyId,
+          routeType: selectedExpense.type,
         };
         const updated: ExpenseDetails = await updateExpenseMutation(updateRequest).unwrap();
         dispatch(
           expenseApi.util.updateQueryData("getExpenseDetails", selectedExpense.familyId, (draft) => {
             if (!draft.expenses) return;
-            const idx = draft.expenses.findIndex((x) => x.id === selectedExpense.id);
+            const idx = draft.expenses.findIndex(
+              (x) => x.id === selectedExpense.id && x.type === selectedExpense.type
+            );
             if (idx >= 0) draft.expenses[idx] = updated;
           })
         );
         return;
       }
 
+      const isRecurring = formData.expenseType === "RECURRING";
       const payload: AddExpenseRequest = {
         userId: user?.id,
         familyId: user?.familyId,
@@ -172,6 +186,8 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
         category: parseInt(formData.category, 10),
         amount: parseFloat(formData.amount),
         expenseDate: formData.expenseDate,
+        type: isRecurring ? 1 : 2,
+        frequency: isRecurring ? formData.recurringFrequency || "MONTHLY" : "ONETIME",
       };
       const created: ExpenseDetails = await addExpenseMutation(payload).unwrap();
       if (created && created.familyId) {
@@ -196,6 +212,18 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
         className={`inline-flex items-center rounded-md bg-white ring-1 px-2 py-0.5 text-[11px] font-medium w-fit ${cls}`}
       >
         {name}
+      </span>
+    );
+  };
+
+  const renderRecurringBadge = (expense: ExpenseDetails) => {
+    if (expense.type !== 1) return null;
+    const freq = (expense.frequency ?? "MONTHLY").trim().toUpperCase();
+    const freqLabel = freq.charAt(0) + freq.slice(1).toLowerCase();
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md bg-white ring-1 ring-rose-200 px-2 py-0.5 text-[11px] font-medium text-rose-700 w-fit">
+        <Repeat className="h-3 w-3" />
+        {freqLabel}
       </span>
     );
   };
@@ -255,10 +283,15 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
           </thead>
           <tbody className="divide-y divide-gray-100 text-gray-800">
             {expenses.map((expense) => (
-              <tr key={expense.id} className="hover:bg-gray-50/60 transition-colors">
+              <tr key={`${expense.id}-${expense.type}`} className="hover:bg-gray-50/60 transition-colors">
                 <td className="py-3 px-4">{getMemberDisplayName(expense.userId)}</td>
                 <td className="py-3 px-4">{expense.description}</td>
-                <td className="py-3 px-4">{renderCategoryBadge(expense.category)}</td>
+                <td className="py-3 px-4">
+                  <div className="flex flex-col gap-1">
+                    {renderCategoryBadge(expense.category)}
+                    {renderRecurringBadge(expense)}
+                  </div>
+                </td>
                 <td className="py-3 px-4 tabular-nums font-medium text-gray-900">
                   {formatCurrency(expense.amount)}
                 </td>
@@ -304,7 +337,7 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
             const canModify = canModifyExpense(expense);
             return (
               <li
-                key={`${expense.id}-card`}
+                key={`${expense.id}-${expense.type}-card`}
                 className="rounded-xl border border-gray-200 bg-white p-4"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -323,6 +356,7 @@ const ExpenseTable: React.FC<ExpenseTableProps> = ({
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {renderCategoryBadge(expense.category)}
+                  {renderRecurringBadge(expense)}
                   <span className="ml-auto text-xs tabular-nums text-gray-500">
                     {formatIndianDate(expense.expenseDate)}
                   </span>

@@ -17,9 +17,11 @@ interface ExpenseModalProps {
 export interface ExpenseFormData {
   id?: number;
   description: string;
-  category: string; // string while in form, parsed to int on submit
+  category: string;
   amount: string;
   expenseDate: string;
+  expenseType: "ONETIME" | "RECURRING";
+  recurringFrequency: "MONTHLY" | "";
 }
 
 type ExpenseFormErrors = Partial<Record<keyof ExpenseFormData, string>>;
@@ -29,6 +31,8 @@ const emptyForm: ExpenseFormData = {
   category: "",
   amount: "",
   expenseDate: "",
+  expenseType: "ONETIME",
+  recurringFrequency: "",
 };
 
 const ExpenseModal: React.FC<ExpenseModalProps> = ({
@@ -46,7 +50,19 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
     category: data?.category ? String(data.category) : "",
     amount: data?.amount?.toString() ?? "",
     expenseDate: data?.expenseDate ?? "",
+    expenseType: data?.type === 1 ? "RECURRING" : "ONETIME",
+    recurringFrequency:
+      (data?.frequency ?? "").trim().toUpperCase() === "MONTHLY" ? "MONTHLY" : "",
   });
+
+  // Local YYYY-MM-DD; toISOString() would shift to UTC and reject today east of UTC.
+  const todayStr = React.useMemo(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }, []);
 
   const [formData, setFormData] = React.useState<ExpenseFormData>(toFormData(initialData));
   const [errors, setErrors] = React.useState<ExpenseFormErrors>({});
@@ -91,13 +107,12 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
 
     if (!formData.expenseDate.trim()) {
       newErrors.expenseDate = "Date is required";
-    } else {
-      const selected = new Date(formData.expenseDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selected > today) {
-        newErrors.expenseDate = "Date cannot be later than today";
-      }
+    } else if (formData.expenseDate > todayStr) {
+      newErrors.expenseDate = "Date cannot be later than today";
+    }
+
+    if (mode === "add" && formData.expenseType === "RECURRING" && !formData.recurringFrequency) {
+      newErrors.recurringFrequency = "Frequency is required for recurring expense";
     }
 
     setErrors(newErrors);
@@ -129,6 +144,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
 
   if (!isOpen) return null;
 
+  const dateLabel = formData.expenseType === "RECURRING" ? "Start date" : "Expense Date";
+
   return (
     <div
       className="fixed top-0 right-0 bottom-0 left-0 z-[9999] flex items-center justify-center overflow-y-auto bg-gray-900/75 px-4 py-6 backdrop-blur-sm"
@@ -142,7 +159,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
             </h2>
             <p className="text-sm text-gray-500 mt-1">
               {mode === "add"
-                ? "Record a new expense for your family."
+                ? "Record a one-time or recurring expense for your family."
                 : "Edit this expense entry for your family."}
             </p>
           </div>
@@ -160,7 +177,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
             label="Description"
             name="description"
             type="text"
-            placeholder="e.g., Grocery run, Electricity bill"
+            placeholder="e.g., Grocery run, Home loan EMI"
             value={formData.description}
             onChange={handleChange}
             icon={<FileText className="w-4 h-4" />}
@@ -195,8 +212,62 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
             error={errors.amount}
           />
 
+          {mode === "add" ? (
+            <>
+              <Input
+                label="Expense Type"
+                name="expenseType"
+                value={formData.expenseType}
+                onChange={handleChange}
+                icon={<Tag className="w-4 h-4" />}
+                error={errors.expenseType}
+                select
+                options={[
+                  { value: "ONETIME", label: "One Time" },
+                  { value: "RECURRING", label: "Recurring (e.g. EMI, SIP, rent)" },
+                ]}
+              />
+
+              {formData.expenseType === "RECURRING" && (
+                <Input
+                  label="Recurring Frequency"
+                  name="recurringFrequency"
+                  value={formData.recurringFrequency}
+                  onChange={handleChange}
+                  icon={<Loader2 className="w-4 h-4" />}
+                  error={errors.recurringFrequency}
+                  select
+                  options={[{ value: "MONTHLY", label: "Monthly" }]}
+                  selectPlaceholder="Select a frequency"
+                />
+              )}
+            </>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-medium text-gray-700">Expense Type</span>
+                <span className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800">
+                  {formData.expenseType === "RECURRING" ? "Recurring" : "One Time"}
+                </span>
+                <span className="text-xs text-gray-500">Type cannot be changed when editing.</span>
+              </div>
+              {formData.expenseType === "RECURRING" && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-gray-700">Frequency</span>
+                  <span className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800">
+                    {formData.recurringFrequency
+                      ? formData.recurringFrequency.charAt(0) +
+                        formData.recurringFrequency.slice(1).toLowerCase()
+                      : (initialData?.frequency ?? "—")}
+                  </span>
+                  <span className="text-xs text-gray-500">Frequency cannot be changed when editing.</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <Input
-            label="Expense Date"
+            label={dateLabel}
             name="expenseDate"
             type="date"
             value={formData.expenseDate}
@@ -204,9 +275,13 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
             icon={<Calendar className="w-4 h-4" />}
             error={errors.expenseDate}
             helperText={
-              !formData.expenseDate ? "Select a date (DD/MM/YYYY format)" : undefined
+              !formData.expenseDate
+                ? "Select a date (DD/MM/YYYY format)"
+                : formData.expenseType === "RECURRING"
+                ? "The first month this expense applies from"
+                : undefined
             }
-            max={new Date().toISOString().split("T")[0]}
+            max={todayStr}
           />
 
           <div className="flex justify-end gap-3 pt-4">

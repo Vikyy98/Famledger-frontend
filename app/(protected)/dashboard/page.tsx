@@ -310,6 +310,7 @@ const DashboardPage: React.FC = () => {
 
   const handleSubmitExpense = async (formData: ExpenseFormData) => {
     try {
+      const isRecurring = formData.expenseType === "RECURRING";
       const payload: AddExpenseRequest = {
         userId: user?.id,
         familyId: user?.familyId,
@@ -317,6 +318,8 @@ const DashboardPage: React.FC = () => {
         category: parseInt(formData.category, 10),
         amount: parseFloat(formData.amount),
         expenseDate: formData.expenseDate,
+        type: isRecurring ? 1 : 2,
+        frequency: isRecurring ? formData.recurringFrequency || "MONTHLY" : "ONETIME",
       };
       const created: ExpenseDetails = await addExpenseMutation(payload).unwrap();
       if (created && created.familyId) {

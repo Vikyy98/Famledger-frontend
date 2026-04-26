@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { PiggyBank, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import Logo from "./Logo";
 
 const PublicNav = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,11 +11,9 @@ const PublicNav = () => {
   return (
     <header className="sticky top-0 z-30 w-full border-b border-gray-200 bg-white/80 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-600">
-            <PiggyBank className="h-6 w-6" />
-          </span>
-          <span className="text-xl font-semibold tracking-tight text-gray-900">
+        <Link href="/" className="flex items-center gap-2">
+          <Logo className="h-9 w-9" />
+          <span className="text-xl font-bold text-gray-900">
             FamLedger
           </span>
         </Link>

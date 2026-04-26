@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { PiggyBank } from "lucide-react";
+import Logo from "./Logo";
 
 type AuthLayoutProps = {
   leftContent: React.ReactNode;
@@ -19,12 +19,10 @@ function AuthLayout({ leftContent, rightContent }: AuthLayoutProps) {
       {/* Logo top-left — visible on all breakpoints for brand continuity. */}
       <Link
         href="/"
-        className="absolute left-6 top-6 z-10 flex items-center gap-2.5"
+        className="absolute left-6 top-6 z-10 flex items-center gap-2"
       >
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-600">
-          <PiggyBank className="h-6 w-6" />
-        </span>
-        <span className="text-xl font-semibold tracking-tight text-gray-900">
+        <Logo className="h-9 w-9" />
+        <span className="text-xl font-bold text-gray-900">
           FamLedger
         </span>
       </Link>

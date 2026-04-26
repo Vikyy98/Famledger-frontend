@@ -42,12 +42,9 @@ const expenseApi = createApi({
       invalidatesTags: [{ type: "Expense", id: "LIST" }],
     }),
 
-    updateExpense: builder.mutation<
-      ExpenseDetails,
-      UpdateExpenseRequest & { familyId: number }
-    >({
-      query: ({ id, familyId, ...payload }) => ({
-        url: `/families/${familyId}/expenses/${id}`,
+    updateExpense: builder.mutation<ExpenseDetails, UpdateExpenseRequest>({
+      query: ({ id, familyId, routeType, ...payload }) => ({
+        url: `/families/${familyId}/expenses/${id}/${routeType}`,
         method: "PUT",
         body: payload,
       }),
@@ -55,8 +52,8 @@ const expenseApi = createApi({
     }),
 
     deleteExpense: builder.mutation<void, DeleteExpenseArgs>({
-      query: ({ id, familyId }) => ({
-        url: `/families/${familyId}/expenses/${id}`,
+      query: ({ id, familyId, routeType }) => ({
+        url: `/families/${familyId}/expenses/${id}/${routeType}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "Expense", id: "LIST" }],

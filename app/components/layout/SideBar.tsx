@@ -5,6 +5,7 @@ import {
   DollarSign,
   Wallet,
   Users,
+  CreditCard,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -38,6 +39,12 @@ export const navItems: NavItem[] = [
     href: "/expense",
     description: "Track and manage family expenses",
     Icon: Wallet,
+  },
+  {
+    name: "Debts",
+    href: "/debts",
+    description: "Track loans, EMIs and debt progress",
+    Icon: CreditCard,
   },
   {
     name: "Members",

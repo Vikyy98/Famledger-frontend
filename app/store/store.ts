@@ -4,6 +4,7 @@ import authSlice from "../services/slices/authSlice";
 import incomeApi from "../services/api/incomeAPI";
 import familyApi from "../services/api/familyAPI";
 import expenseApi from "../services/api/expenseAPI";
+import debtsApi from "../services/api/debtsAPI";
 
 export const store = configureStore({
   reducer: {
@@ -12,13 +13,15 @@ export const store = configureStore({
     [incomeApi.reducerPath]: incomeApi.reducer,
     [familyApi.reducerPath]: familyApi.reducer,
     [expenseApi.reducerPath]: expenseApi.reducer,
+    [debtsApi.reducerPath]: debtsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(authApi.middleware)
-      .concat(incomeApi.middleware)
       .concat(familyApi.middleware)
-      .concat(expenseApi.middleware),
+      .concat(incomeApi.middleware)
+      .concat(expenseApi.middleware)
+      .concat(debtsApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

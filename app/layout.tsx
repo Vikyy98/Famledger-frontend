@@ -10,7 +10,8 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://famledger.app";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://famledger-frontend.vercel.app";
 const description =
   "FamLedger helps families track shared income, expenses, and debts in one place.";
 

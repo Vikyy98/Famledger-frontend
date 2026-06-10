@@ -39,7 +39,7 @@ const IncomePage: React.FC = () => {
       <MainLayout>
         <div className="h-screen flex justify-center items-center bg-red-100 text-red-700">
           <AlertTriangle className="h-8 w-8 mr-2" />
-          <p>Fatal Error: Could not load data.</p>
+          <p>We couldn&apos;t load your income right now. Please refresh and try again.</p>
         </div>
       </MainLayout>
     );

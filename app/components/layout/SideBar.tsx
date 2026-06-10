@@ -97,6 +97,9 @@ function SideBar({ isMobileOpen = false, onCloseMobile }: SideBarProps) {
             <span className="text-lg font-bold text-gray-900">
               FamLedger
             </span>
+            <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+              Beta
+            </span>
           </Link>
 
           <button

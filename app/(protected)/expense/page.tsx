@@ -44,7 +44,7 @@ const ExpensePage: React.FC = () => {
       <MainLayout>
         <div className="h-screen flex justify-center items-center bg-red-100 text-red-700">
           <AlertTriangle className="h-8 w-8 mr-2" />
-          <p>Fatal Error: Could not load expenses. {JSON.stringify(error)}</p>
+          <p>We couldn&apos;t load your expenses right now. Please refresh and try again.</p>
         </div>
       </MainLayout>
     );

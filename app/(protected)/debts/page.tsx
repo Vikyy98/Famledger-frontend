@@ -99,7 +99,7 @@ const DebtsPage: React.FC = () => {
       <MainLayout>
         <div className="h-screen flex justify-center items-center bg-red-100 text-red-700">
           <AlertTriangle className="h-8 w-8 mr-2" />
-          <p>Could not load your debts. {JSON.stringify(error)}</p>
+          <p>We couldn&apos;t load your debts right now. Please refresh and try again.</p>
         </div>
       </MainLayout>
     );

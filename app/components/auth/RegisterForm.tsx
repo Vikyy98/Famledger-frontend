@@ -7,6 +7,7 @@ import { Eye, EyeOff, Home, KeyRound, Lock, Mail, User } from "lucide-react";
 import { useRegisterUserMutation } from "@/app/services/api/authAPI";
 import { RegisterRequest, RegistrationMode } from "@/app/types/auth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -231,15 +232,20 @@ function RegisterForm() {
         {isLoading ? "Creating account…" : "Create account"}
       </Button>
 
+      <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        FamLedger is in early beta. Please don&apos;t enter real bank credentials or
+        sensitive financial details yet.
+      </p>
+
       <p className="text-xs text-gray-500 text-center">
         By signing up, you agree to our{" "}
-        <a href="#" className="font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 hover:text-gray-900 hover:decoration-gray-500">
+        <Link href="/terms" className="font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 hover:text-gray-900 hover:decoration-gray-500">
           Terms of Service
-        </a>{" "}
+        </Link>{" "}
         and{" "}
-        <a href="#" className="font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 hover:text-gray-900 hover:decoration-gray-500">
+        <Link href="/privacy" className="font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 hover:text-gray-900 hover:decoration-gray-500">
           Privacy Policy
-        </a>
+        </Link>
         .
       </p>
     </form>

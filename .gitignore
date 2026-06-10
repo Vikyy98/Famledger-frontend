@@ -23,6 +23,10 @@
 # misc
 .DS_Store
 *.pem
+.cursor/
+
+# deployment bundle (build artifact, not source)
+/deploy/
 
 # debug
 npm-debug.log*
